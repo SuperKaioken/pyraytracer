@@ -50,11 +50,8 @@ class MainWindow(pyglet.window.Window):
 #        glRotatef(-45, 1, 0, 0)
         
         # Always redisplay after projection/mapping change
-        self.on_draw()
-    
-    def on_draw(self):
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         
+        print 'test'
         for i in range(WIDTH):
             for j in range(HEIGHT):
                 d = self.rays.get_ray_direction(i, j)
@@ -64,7 +61,10 @@ class MainWindow(pyglet.window.Window):
                     pyglet.graphics.draw(1, GL_POINTS, 
                                          ('v2i', (i,j)),
                                          ('c3B', (0, 1, 0)))
-                
+    
+    def on_draw(self):
+        #glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        pass       
         
     
     def on_key_release(self, symbol, modifiers):
