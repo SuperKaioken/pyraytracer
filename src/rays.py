@@ -26,8 +26,8 @@ class Rays():
         self.b = 0
         self.t = height
         
-        self.nx = 800
-        self.ny = 800
+        self.nx = 100
+        self.ny = 100
         
     
     def shoot_rays(self):

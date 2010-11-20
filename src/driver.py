@@ -10,8 +10,8 @@ import scene
 import rays
 import objects
 
-WIDTH = 800
-HEIGHT = 800
+WIDTH = 100
+HEIGHT = 100
 DEPTH = 500
 
 # The pyglet Window
@@ -55,6 +55,7 @@ class MainWindow(pyglet.window.Window):
         for i in range(WIDTH):
             for j in range(HEIGHT):
                 d = self.rays.get_ray_direction(i, j)
+                print d
                 object1 = self.scene.get_object_list()[0]
                 
                 if(object1.intersection_test(d, numpy.array([0, 0, 0])) > 0):

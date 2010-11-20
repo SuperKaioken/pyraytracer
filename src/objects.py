@@ -16,6 +16,7 @@ class Sphere():
         
     def intersection_test(self, d, e):
         discriminant = self.discriminant_test(d, e)
+        print discriminant
         if discriminant < 0:
             return 0
         elif discriminant == 0:
