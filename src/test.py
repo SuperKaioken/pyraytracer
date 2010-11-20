@@ -1,3 +1,5 @@
-x = [1,1,1]
+import scene
 
-print 
+scene1 = scene.Scene()
+
+print scene1.get_object_list()
