@@ -37,14 +37,9 @@ class Rays():
         u = self.l + (self.r - self.l)*(i + 0.5) / self.nx
         v = self.b + (self.t - self.b)*(j + 0.5) / self.ny
         
-        direction = numpy.array()
-        direction[0] = self.waxis * -self.d
-        direction[1] = self.uaxus * u
-        direction[2] = self.vaxis * v
+        direction = numpy.array((self.waxis * -self.d) + (self.uaxis * u) + (self.vaxis * v))
         
-        print direction
-        
-        return self.normalize(numpy.array([self.waxis * -self.d] + [self.uaxis * u] + [self.vaxis * v]))
+        return self.normalize(direction)
                  
     def normalize(self, vector):
         distance = numpy.sqrt((vector[0] ** 2) + (vector[1] ** 2) + (vector[2] ** 2))

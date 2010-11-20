@@ -21,10 +21,10 @@ class Sphere():
         elif discriminant == 0:
             return [-d * (e - self.c)]
         elif discriminant > 0:
-            return [-d * (e - self.c + discriminant), -d * (e - self.c - discriminant)]
+            return [numpy.dot(-d, (e - self.c) + numpy.sqrt(discriminant)) / numpy.dot(d, d), numpy.dot(-d, (e - self.c) - numpy.sqrt(discriminant)) / numpy.dot(d, d)]
     
     def discriminant_test(self, d, e):
-        result = math.sqrt((d * (e - self.c)) ** 2 - (d * d)((e - self.c) * (e - self.c) - self.R ** 2))  
-    
+        result = (numpy.dot(d, (e - self.c)) ** 2 - (numpy.dot(d, d)) * (numpy.dot(e - self.c, e - self.c)) - self.R ** 2)
+        
         return result  
         
