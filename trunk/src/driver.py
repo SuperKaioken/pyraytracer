@@ -10,6 +10,8 @@ import objects
 
 WIDTH = 800
 HEIGHT = 800
+DEPTH = 500
+
 # The pyglet Window
 class MainWindow(pyglet.window.Window):
     def __init__(self):
@@ -23,7 +25,7 @@ class MainWindow(pyglet.window.Window):
         glEnable(GL_DEPTH_TEST)
         
         self.scene = scene.Scene()
-        self.rays = rays.Rays(WIDTH, HEIGHT)
+        self.rays = rays.Rays(WIDTH, HEIGHT, DEPTH)
         
 
     def on_resize(self, w, h):
