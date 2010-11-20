@@ -1,3 +1,4 @@
+import numpy
 import math
 
 class Sphere():
@@ -16,7 +17,7 @@ class Sphere():
     def intersection_test(self, d, e):
         discriminant = self.discriminant_test(d, e)
         if discriminant < 0:
-            return []
+            return 0
         elif discriminant == 0:
             return [-d * (e - self.c)]
         elif discriminant > 0:

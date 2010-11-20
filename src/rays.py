@@ -1,3 +1,5 @@
+import numpy
+
 import math
 
 class Rays():
@@ -14,10 +16,10 @@ class Rays():
         self.height = height # height of the image plane
         self.d = depth
         
-        self.waxis = [0,0,1]
-        self.uaxis = [1,0,0]
-        self.vaxis = [0,1,0]
-        self.S = [0,1,0]
+        self.waxis = numpy.array([0,0,1])
+        self.uaxis = numpy.array([1,0,0])
+        self.vaxis = numpy.array([0,1,0])
+
         
         self.l = 0
         self.r = width
@@ -34,14 +36,23 @@ class Rays():
     def get_ray_direction(self, i, j):
         u = self.l + (self.r - self.l)*(i + 0.5) / self.nx
         v = self.b + (self.t - self.b)*(j + 0.5) / self.ny
-                
-        direction = [x * -self.d for x in self.waxis] + [x * u for x in self.uaxis] + [x * v for x in self.vaxis]
-        direction = self.normalize(direction)
+        
+        direction = numpy.array()
+        direction[0] = self.waxis * -self.d
+        direction[1] = self.uaxus * u
+        direction[2] = self.vaxis * v
+        
+        print direction
+        
+        return self.normalize(numpy.array([self.waxis * -self.d] + [self.uaxis * u] + [self.vaxis * v]))
                  
     def normalize(self, vector):
-        distance = math.sqrt((vector[0] ** 2) + (vector[1] ** 2) + (vector[1] ** 2))
+        distance = numpy.sqrt((vector[0] ** 2) + (vector[1] ** 2) + (vector[2] ** 2))
         
-        return [vector[0] / distance, vector[1] / distance, vector[2] / distance]       
+        try:   
+            return numpy.array([vector[0] / distance, vector[1] / distance, vector[2] / distance]) 
+        except(ZeroDivisionError):
+            return numpy.array([0, 0, 0])      
                 
                 
         

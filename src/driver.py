@@ -4,6 +4,8 @@ from pyglet.window import key
 from pyglet.window import mouse
 from pyglet.gl import *
 
+import numpy
+
 import scene
 import rays
 import objects
@@ -56,7 +58,9 @@ class MainWindow(pyglet.window.Window):
         for i in range(WIDTH):
             for j in range(HEIGHT):
                 d = self.rays.get_ray_direction(i, j)
-                if(len(objects.Sphere.intersection_test(d, [0, 0, 0])) > 0):
+                object1 = self.scene.get_object_list()[0]
+                
+                if(object1.intersection_test(d, numpy.array([0, 0, 0])) > 0):
                     pyglet.graphics.draw(1, GL_POINTS, 
                                          ('v2i', (i,j)),
                                          ('c3B', (0, 1, 0)))
