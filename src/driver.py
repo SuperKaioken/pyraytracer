@@ -22,7 +22,7 @@ class MainWindow(pyglet.window.Window):
                                          resizable = True)
         
         # set the color to be used when glClear() is called
-        glClearColor(1, 1, 1, 1) 
+        glClearColor(1, 1, 1, 1)  
         
         glEnable(GL_DEPTH_TEST)
         
@@ -51,11 +51,9 @@ class MainWindow(pyglet.window.Window):
         
         # Always redisplay after projection/mapping change
         
-        print 'test'
         for i in range(WIDTH):
             for j in range(HEIGHT):
                 d = self.rays.get_ray_direction(i, j)
-                print d
                 object1 = self.scene.get_object_list()[0]
                 
                 if(object1.intersection_test(d, numpy.array([0, 0, 0])) > 0):
@@ -64,10 +62,9 @@ class MainWindow(pyglet.window.Window):
                                          ('c3B', (0, 1, 0)))
     
     def on_draw(self):
-        #glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        pass       
-        
-    
+        #glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)     
+        pass
+           
     def on_key_release(self, symbol, modifiers):
         pass
         
