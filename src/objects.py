@@ -15,8 +15,7 @@ class Sphere():
         self.color = color
         
     def intersection_test(self, d, e):
-        discriminant = self.discriminant_test(d, e)
-        print discriminant
+        discriminant = self.discriminant_test(d, e)        
         if discriminant < 0:
             return 0
         elif discriminant == 0:    
@@ -25,11 +24,7 @@ class Sphere():
             return 1            
     
     def discriminant_test(self, d, e):
-        #result = (numpy.dot(d, (e - self.c)) ** 2 - (numpy.dot(d, d)) * (numpy.dot(e - self.c, e - self.c)) - self.R ** 2)
-        v = e - self.c
-        b = -(numpy.dot(v, d))    
-            
-        result = (b*b) - numpy.dot(v, v) + (self.R*self.R)
+        result = (numpy.dot(d, (e - self.c)) ** 2 - numpy.dot(d, d) * ((numpy.dot(e - self.c, e - self.c)) - (self.R ** 2)))        
         
-        return result  
+        return result 
         
