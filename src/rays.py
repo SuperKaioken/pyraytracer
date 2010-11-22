@@ -1,5 +1,4 @@
 import numpy
-
 import math
 
 class Rays():
@@ -26,8 +25,8 @@ class Rays():
         self.b = 0
         self.t = height
         
-        self.nx = 100
-        self.ny = 100
+        self.nx = width
+        self.ny = height
         
     
     def shoot_rays(self):

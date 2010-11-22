@@ -56,7 +56,7 @@ class MainWindow(pyglet.window.Window):
                 d = self.rays.get_ray_direction(i, j)
                 object1 = self.scene.get_object_list()[0]
                 
-                if(object1.intersection_test(d, numpy.array([20,20,20])) > 0):
+                if(object1.intersection_test(d, numpy.array([0,0,0])) > 0):
                     pyglet.graphics.draw(1, GL_POINTS, 
                                          ('v2i', (i,j)),
                                          ('c3B', (0,1,0)))
