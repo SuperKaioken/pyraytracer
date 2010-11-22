@@ -10,10 +10,6 @@ import scene
 import rays
 import objects
 
-WIDTH = 120
-HEIGHT = 100
-DEPTH = 100
-
 IMAGE_PLANE_WIDTH = 150
 IMAGE_PLANE_HEIGHT = 150
 VIEWPOINT = numpy.array([0,0,-100])

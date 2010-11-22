@@ -15,6 +15,7 @@ class Scene(object):
         
         object1 = objects.Sphere(numpy.array([1, 0, -50]), 10, [1.0, 0.0, 0.0])
         object2 = objects.Sphere(numpy.array([3, 0, -30]), 10, [1.0, 0.0, 0.0])
+
         self.object_list.append(object1)
         self.object_list.append(object2)
     
