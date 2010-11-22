@@ -20,10 +20,11 @@ class Rays():
         self.vaxis = numpy.array([0,1,0])
 
         
-        self.l = 0
-        self.r = width
-        self.b = 0
-        self.t = height
+        self.l = -4#-width-
+        self.r = 4#width
+        self.b = -3#-height
+        self.t = 3#height
+        self.d = 5
         
         self.nx = width
         self.ny = height
@@ -37,6 +38,7 @@ class Rays():
         v = self.b + (self.t - self.b)*(j + 0.5) / self.ny
         
         direction = numpy.array((self.waxis * -self.d) + (self.uaxis * u) + (self.vaxis * v))
+        
         
         return self.normalize(direction)
                  
