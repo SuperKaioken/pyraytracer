@@ -30,9 +30,7 @@ class MainWindow(pyglet.window.Window):
                                          resizable = True)
         
         # set the color to be used when glClear() is called
-        glClearColor(1, 1, 1, 1)  
-        
-        #glEnable(GL_DEPTH_TEST)
+        glClearColor(1, 1, 1, 1)                  
         
         self.scene = scene.Scene()
         self.rays = rays.Rays(IMAGE_PLANE_WIDTH, IMAGE_PLANE_HEIGHT, IMAGE_PLANE_DISTANCE, WINDOW_WIDTH, WINDOW_HEIGHT)        
