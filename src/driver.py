@@ -60,5 +60,5 @@ if __name__ == '__main__':
             if(object1.intersection_test(direction, VIEWPOINT) > 0):                
                 img.putpixel((i,j), (0,255,0))
             
-    img.save("../test.bmp")
+    img.save("../../test.bmp")
     print "FINISHED"

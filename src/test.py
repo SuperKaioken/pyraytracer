@@ -16,7 +16,7 @@ def normalize(vector):
 
 scene = scene.Scene() 
 rays = rays.Rays(150, 150, VIEWPOINT[2], 150, 150)
-object1 = objects.Sphere(numpy.array([0, 0, -10]), 8, [1.0, 0.0, 0.0])
+object1 = objects.Sphere(numpy.array([0, 8, -10]), 8, [1.0, 0.0, 0.0])
 
 image_point = numpy.array([0,0,0])
 direction = normalize(image_point - VIEWPOINT)
