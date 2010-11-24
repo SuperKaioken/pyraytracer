@@ -1,7 +1,11 @@
 import numpy
 import math
 
-v1 = numpy.array([2,2,2])
-v2 = numpy.array([3,4,3])
+import scene, rays, objects
+VIEWPOINT = [0,0,5]
 
-print v1 ** 2 
+scene = scene.Scene() 
+rays = rays.Rays(150, 150, -VIEWPOINT[2], 150, 150)
+object1 = objects.Sphere(numpy.array([0, 0, -1]), 5, [1.0, 0.0, 0.0])
+
+direction = rays.get_ray_direction()
