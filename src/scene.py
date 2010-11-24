@@ -13,7 +13,7 @@ class Scene(object):
         '''
         self.object_list = [] 
         
-        object1 = objects.Sphere(numpy.array([0, 0, -1]), 5, [1.0, 0.0, 0.0])
+        object1 = objects.Sphere(numpy.array([0,0,-50]), 40, [1.0, 0.0, 0.0])
 
         self.object_list.append(object1)
     

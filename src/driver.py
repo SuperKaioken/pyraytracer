@@ -18,8 +18,8 @@ DEPTH = 100
  
 IMAGE_PLANE_WIDTH = 150
 IMAGE_PLANE_HEIGHT = 150
-VIEWPOINT = numpy.array([0,0,5])
-IMAGE_PLANE_DISTANCE = -VIEWPOINT[2]
+VIEWPOINT = numpy.array([0,0,100])
+IMAGE_PLANE_DISTANCE = VIEWPOINT[2]
 WINDOW_WIDTH = 150
 WINDOW_HEIGHT = 150
 
@@ -58,4 +58,4 @@ if __name__ == '__main__':
                 print "test"
                 img.putpixel((i,j), (0,255,0))
             
-    img.save("../test.bmp") 
+    img.save("../../test.bmp") 
