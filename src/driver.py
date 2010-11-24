@@ -18,10 +18,13 @@ DEPTH = 100
  
 IMAGE_PLANE_WIDTH = 150
 IMAGE_PLANE_HEIGHT = 150
-VIEWPOINT = numpy.array([0,0,100])
+VIEWPOINT = numpy.array([0,0,5])
 IMAGE_PLANE_DISTANCE = VIEWPOINT[2]
 WINDOW_WIDTH = 150
 WINDOW_HEIGHT = 150
+
+
+
 
 
 # The pyglet Window
@@ -54,8 +57,8 @@ if __name__ == '__main__':
             direction = rays.get_ray_direction(i,j)
             object1 = scene.get_object_list()[0]
             
-            if(object1.intersection_test(direction, VIEWPOINT) > 0):
-                print "test"
+            if(object1.intersection_test(direction, VIEWPOINT) > 0):                
                 img.putpixel((i,j), (0,255,0))
             
-    img.save("../../test.bmp") 
+    img.save("../test.bmp")
+    print "FINISHED"
