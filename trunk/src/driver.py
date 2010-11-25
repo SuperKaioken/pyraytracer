@@ -6,9 +6,7 @@ from pyglet.gl import *
 
 import numpy
 
-import scene
-import rays
-import objects
+import scene, rays, objects, lighting
 
 import Image
 
@@ -22,10 +20,6 @@ VIEWPOINT = numpy.array([0,0,5])
 IMAGE_PLANE_DISTANCE = VIEWPOINT[2]
 WINDOW_WIDTH = 150
 WINDOW_HEIGHT = 150
-
-
-
-
 
 # The pyglet Window
 class MainWindow(pyglet.window.Window):
@@ -45,7 +39,7 @@ class MainWindow(pyglet.window.Window):
         glPointSize(1)                           
         
 if __name__ == '__main__':
-    scene = scene.Scene() 
+    scene.INIT()
     rays = rays.Rays(IMAGE_PLANE_WIDTH, IMAGE_PLANE_HEIGHT, IMAGE_PLANE_DISTANCE, WINDOW_WIDTH, WINDOW_HEIGHT)
     
     img = Image.new("RGB", (WINDOW_WIDTH, WINDOW_HEIGHT))
@@ -55,10 +49,15 @@ if __name__ == '__main__':
             #direction = rays.get_ray_direction(i, j, VIEWPOINT)
             point = numpy.array([i,j,0])
             direction = rays.get_ray_direction(i,j)
-            object1 = scene.get_object_list()[0]
+            object1 = scene.GET_OBJECT_LIST()[0]
             
+            color = scene.BACKGROUND_COLOR
+            # if ray intersects object1
             if(object1.intersection_test(direction, VIEWPOINT) > 0):                
-                img.putpixel((i,j), (0,255,0))
+                # apply lighting
+                color = lighting.calc_lighting(object1, point)
+                print color
+            img.putpixel((i,j), (color[0] * 255, color[1] * 255, color[2] * 255)) # since we are using floats, must convert to integer
             
     img.save("../../test.bmp")
     print "FINISHED"

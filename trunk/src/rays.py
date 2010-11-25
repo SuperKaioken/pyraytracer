@@ -28,8 +28,8 @@ class Rays():
         self.ny = window_height
     
     def get_ray_direction(self, i, j):
-        u = self.l + (((self.r - self.l)*(i)) / self.nx)
-        v = self.b + (((self.t - self.b)*(j)) / self.ny)
+        u = self.l + (((self.r - self.l)*(i + 0.5)) / self.nx)
+        v = self.b + (((self.t - self.b)*(j + 0.5)) / self.ny)
         
         direction = numpy.array((self.waxis * -self.image_plane_distance) + (self.uaxis * u) + (self.vaxis * v))
         
