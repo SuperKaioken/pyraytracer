@@ -1,6 +1,14 @@
 import numpy
 import math
 
+def normalize(self, vector):
+    distance = numpy.sqrt((vector[0] ** 2) + (vector[1] ** 2) + (vector[2] ** 2))
+    
+    try:   
+        return numpy.array([vector[0] / distance, vector[1] / distance, vector[2] / distance]) 
+    except(ZeroDivisionError):
+        return numpy.array([0, 0, 0]) 
+        
 class Light():
     
     def __init__(self, position, color, spectral_color):
@@ -42,3 +50,27 @@ class Sphere():
         
         return (point - self.c) / self.R
     
+class Plane():
+    
+    def __init__(self, normal, point_on_plane, color, spectral_color, shininess):
+        self.normal = normal
+        self.point_on_plane = point_on_plane
+        self.color = color
+        self.spectral_color = spectral_color
+        self.shininess = shininess
+        
+    def intersection_test(self, d, e):
+        denom = numpy.dot(d,self.normal)
+        if denom == 0:
+            return 0
+        else:
+            t = numpy.dot(self.normal, (self.point_on_plane - e)) / denom
+            print t
+            if t < 0:
+                return t
+            else:
+                return t
+            
+    def calc_normal(self, point):
+        return self.normal
+            

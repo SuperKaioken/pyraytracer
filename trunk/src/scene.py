@@ -8,11 +8,14 @@ LIGHT_LIST = []
 
 def INIT():
     # center, radius, color, spectral_color, shininess
-    object1 = objects.Sphere(numpy.array([0, 0, -80]), 75, numpy.array([1.0, 0.0, 0.0]), numpy.array([0.8, 0.8, 0.8]), 32)
+    object1 = objects.Sphere(numpy.array([0, -40, -80]), 75, numpy.array([1.0, 0.0, 0.0]), numpy.array([0.8, 0.8, 0.8]), 32)
+    
+    # normal, point_on_plane, color, spectral_color, shininess
+    #object1 = objects.Plane(numpy.array([0,1,0]), numpy.array([5,-5,-10]), numpy.array([1.0,0.0,0.0]), numpy.array([0.8,0.8,0.8]), 32)
     OBJECT_LIST.append(object1)
     
     # position, color, spectral_color
-    light1 = objects.Light(numpy.array([-75,-75,0]), numpy.array([1,1,1]), numpy.array([0.5,0.5,0.5]))
+    light1 = objects.Light(numpy.array([0,-15,0]), numpy.array([1,1,1]), numpy.array([0.5,0.5,0.5]))
     LIGHT_LIST.append(light1)
         
 def GET_OBJECT_LIST():
