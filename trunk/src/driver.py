@@ -9,10 +9,6 @@ import numpy
 import scene, rays, objects, lighting
 
 import Image
-
-WIDTH = 120
-HEIGHT = 100
-DEPTH = 100
  
 IMAGE_PLANE_WIDTH = 150
 IMAGE_PLANE_HEIGHT = 150
