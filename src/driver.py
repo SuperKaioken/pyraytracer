@@ -10,8 +10,8 @@ import scene, rays, objects, lighting
 
 import Image
  
-IMAGE_PLANE_WIDTH = 150
-IMAGE_PLANE_HEIGHT = 150
+IMAGE_PLANE_WIDTH = 75
+IMAGE_PLANE_HEIGHT = 75
 VIEWPOINT = numpy.array([0,0,5])
 IMAGE_PLANE_DISTANCE = VIEWPOINT[2]
 WINDOW_WIDTH = 150
@@ -43,15 +43,17 @@ if __name__ == '__main__':
     for i in range(WINDOW_WIDTH):
         for j in range(WINDOW_HEIGHT):
             #direction = rays.get_ray_direction(i, j, VIEWPOINT)
-            point = numpy.array([i,j,0])
             direction = rays.get_ray_direction(i,j)
             object1 = scene.GET_OBJECT_LIST()[0]
             
             color = scene.BACKGROUND_COLOR
+            
+            intersection_point = 0
+            intersection_point = object1.intersection_test(direction, VIEWPOINT)
             # if ray intersects object1
-            if(object1.intersection_test(direction, VIEWPOINT) > 0):                
+            if(intersection_point > 0):                
                 # apply lighting
-                color = lighting.calc_lighting(object1, point)
+                color = lighting.calc_lighting(object1, VIEWPOINT + intersection_point * direction) # p(t) = e + td
                 print color
             img.putpixel((i,j), (color[0] * 255, color[1] * 255, color[2] * 255)) # since we are using floats, must convert to integer
             

@@ -24,7 +24,7 @@ def calc_Ia(ka, Iaglobal):
 
 def calc_Id(kd, li, n, Idi):
     
-    return kd * Idi * numpy.dot(li, n)
+    return kd * numpy.dot(li, n) * Idi
 
 def calc_Is(ks, n, h, s, Isi):
         
