@@ -55,9 +55,9 @@ class MainWindow(pyglet.window.Window):
                     pyglet.graphics.draw(1, GL_POINTS,('v2i', (i,j)),('c3f', scene.BACKGROUND_COLOR))
                 
                 if len(intersections) != 0:
+                    print colors[0]
                     pyglet.graphics.draw(1, GL_POINTS,('v2i', (i,j)),('c3f', colors[0]))
                         
-                #pyglet.graphics.draw(1, GL_POINTS,('v2i', (i,j)),('c3f', color)) 
 if __name__ == '__main__':
     scene.INIT()
     window = MainWindow()
