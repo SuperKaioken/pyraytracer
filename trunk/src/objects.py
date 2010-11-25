@@ -40,5 +40,5 @@ class Sphere():
 
     def calc_normal(self, point):
         
-        return 2 * (point - self.c)
+        return (point - self.c) / self.R
     

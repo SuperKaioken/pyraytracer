@@ -2,20 +2,14 @@ import numpy
 import scene, objects, driver
 
 def calc_lighting(object, point):
-    n = normalize(object.calc_normal(point))          
-
-    v = normalize(driver.VIEWPOINT - point)
-                    
-    #v = self.normalize([-vertex_eye[0], -vertex_eye[1], -vertex_eye[2]]) # 0 - the vertex
-
-                        
     light_position = scene.GET_LIGHT_LIST()[0].position
     light_color = scene.GET_LIGHT_LIST()[0].color
     light_spectral_color = scene.GET_LIGHT_LIST()[0].spectral_color
-                    
-    li = normalize(light_position - point)
     
-    h = normalize(li + v)
+    n = normalize(object.calc_normal(point))          
+    v = normalize(driver.VIEWPOINT - point) # direction TO camera FROM surface                  
+    li = normalize(light_position - point) # direction to given light i
+    h = normalize(li + v) 
                      
     Ia = calc_Ia(object.color, scene.AMBIENT)
     Id = calc_Id(object.color, li, n, light_color)
@@ -30,7 +24,7 @@ def calc_Ia(ka, Iaglobal):
 
 def calc_Id(kd, li, n, Idi):
     
-    return Idi * numpy.dot(li, n)
+    return kd * Idi * numpy.dot(li, n)
 
 def calc_Is(ks, n, h, s, Isi):
         
