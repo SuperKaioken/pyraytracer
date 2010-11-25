@@ -46,16 +46,15 @@ class MainWindow(pyglet.window.Window):
                     if(intersection_point > 0): 
                         intersections.append(intersection_point)                              
                         colors.append(lighting.calc_lighting(object, VIEWPOINT + intersection_point * d)) # p(t) = e + td   
-                
+                        #colors.append(numpy.array([1.0,0,0]))
                 try:
                     assoc = zip(object_list, intersections, colors)
                     assoc.sort()
-                    object_list, intersections, colors = zip(assoc)
+                    object_list, intersections, colors = zip(*assoc)
                 except(ValueError):
                     pyglet.graphics.draw(1, GL_POINTS,('v2i', (i,j)),('c3f', scene.BACKGROUND_COLOR))
                 
                 if len(intersections) != 0:
-                    print colors[0]
                     pyglet.graphics.draw(1, GL_POINTS,('v2i', (i,j)),('c3f', colors[0]))
                         
 if __name__ == '__main__':
