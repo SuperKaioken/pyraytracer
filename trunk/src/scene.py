@@ -28,10 +28,3 @@ class Scene(object):
         '''
         Constructor
         '''   
-        global OBJECT_LIST, LIGHT_LIST
-             
-        object1 = objects.Sphere(numpy.array([0, 0, -80]), 75, [1.0, 0.0, 0.0], [0.8, 0.8, 0.8], 32)
-        OBJECT_LIST.append(object1)
-        
-        light1 = objects.Light(numpy.array([1,1,1]), numpy.array([1,1,1]), numpy.array([0.5,0.5,0.5]))
-        LIGHT_LIST.append(light1)

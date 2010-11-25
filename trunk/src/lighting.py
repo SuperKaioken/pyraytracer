@@ -1,7 +1,5 @@
 import numpy
-import scene
-import objects
-import driver
+import scene, objects, driver
 
 def calc_lighting(object, point):
     n = normalize(object.calc_normal(point))          
