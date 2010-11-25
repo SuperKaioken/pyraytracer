@@ -1,7 +1,7 @@
 import numpy
 import math
 
-def normalize(self, vector):
+def normalize(vector):
     distance = numpy.sqrt((vector[0] ** 2) + (vector[1] ** 2) + (vector[2] ** 2))
     
     try:   
@@ -60,11 +60,11 @@ class Plane():
         self.shininess = shininess
         
     def intersection_test(self, d, e):
-        denom = numpy.dot(d,self.normal)
+        denom = numpy.dot(normalize(d), normalize(self.normal))
         if denom == 0:
             return 0
         else:
-            t = numpy.dot(self.normal, (self.point_on_plane - e)) / denom
+            t = numpy.dot(normalize(self.normal), normalize((self.point_on_plane - e))) / denom
             print t
             if t < 0:
                 return t
