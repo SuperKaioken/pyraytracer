@@ -10,8 +10,8 @@ import scene, rays, objects, lighting
 
 import Image
  
-IMAGE_PLANE_WIDTH = 75
-IMAGE_PLANE_HEIGHT = 75
+IMAGE_PLANE_WIDTH = 150
+IMAGE_PLANE_HEIGHT = 150
 VIEWPOINT = numpy.array([0,0,5])
 IMAGE_PLANE_DISTANCE = VIEWPOINT[2]
 WINDOW_WIDTH = 150
