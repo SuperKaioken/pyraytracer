@@ -37,13 +37,14 @@ class MainWindow(pyglet.window.Window):
         for i in range(WIDTH):
             for j in range(HEIGHT):
                 d = self.rays.get_ray_direction(i, j)
-                object1 = scene.GET_OBJECT_LIST()[0]
+                for object1 in scene.GET_OBJECT_LIST():
+                #object1 = scene.GET_OBJECT_LIST()[0]
                 
-                intersection_point = object1.intersection_test(d, VIEWPOINT)
-                color = [0,0,0]
-                if(intersection_point > 0):                               
-                    color = lighting.calc_lighting(object1, VIEWPOINT + intersection_point * d) # p(t) = e + td   
-                pyglet.graphics.draw(1, GL_POINTS,('v2i', (i,j)),('c3f', color)) 
+                    intersection_point = object1.intersection_test(d, VIEWPOINT)
+                    color = [0,0,0]
+                    if(intersection_point > 0):                               
+                        color = lighting.calc_lighting(object1, VIEWPOINT + intersection_point * d) # p(t) = e + td   
+                    pyglet.graphics.draw(1, GL_POINTS,('v2i', (i,j)),('c3f', color)) 
 if __name__ == '__main__':
     scene.INIT()
     window = MainWindow()
