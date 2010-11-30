@@ -22,7 +22,7 @@ def INIT():
     OBJECT_LIST.append(plane)
     
     # position, color, spectral_color
-    light1 = objects.Light(numpy.array([-20,30,-40]), numpy.array([1,1,1]), numpy.array([0.5,0.5,0.5]))
+    light1 = objects.Light(numpy.array([20, 50, 10]), numpy.array([1,1,1]), numpy.array([0.5,0.5,0.5]))
     LIGHT_LIST.append(light1)
         
 def GET_OBJECT_LIST():

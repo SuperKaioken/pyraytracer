@@ -65,7 +65,6 @@ class Plane():
             return 0
         else:
             t = numpy.dot(normalize(self.normal), normalize((self.point_on_plane - e))) / denom
-            print t
             if t < 0:
                 return t
             else:
