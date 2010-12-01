@@ -7,22 +7,34 @@ OBJECT_LIST = []
 LIGHT_LIST = []
 
 def INIT():
+#    # center, radius, color, spectral_color, shininess
+#    object1 = objects.Sphere(numpy.array([-30, 10, -80]), 10, numpy.array([1.0, 0.0, 0.0]), numpy.array([0.8, 0.8, 0.8]), 32)
+#    object2 = objects.Sphere(numpy.array([0, 10, -80]), 10, numpy.array([0.0, 0.0, 1.0]), numpy.array([0.8, 0.8, 0.8]), 32)
+#    object3 = objects.Sphere(numpy.array([-15, 10, -85]), 20, numpy.array([0.0, 1.0, 0.0]), numpy.array([0.8, 0.8, 0.8]), 32)
+#    object4 = objects.Sphere(numpy.array([30, 10, -85]), 20, numpy.array([1.0, 1.0, 0.0]), numpy.array([0.8, 0.8, 0.8]), 32)
+#
+#    plane = objects.Plane(numpy.array([0,1,0]), numpy.array([0,-1,-5]), numpy.array([1.0, 0.0, 1.0]), numpy.array([0.8, 0.8, 0.8]), 32)
+#
+#    OBJECT_LIST.append(object1)
+#    OBJECT_LIST.append(object2)
+#    OBJECT_LIST.append(object3)
+#    OBJECT_LIST.append(object4)
+#    OBJECT_LIST.append(plane)
+#    
+#    # position, color, spectral_color
+#    light1 = objects.Light(numpy.array([0, 50, -80]), numpy.array([1,1,1]), numpy.array([0.5,0.5,0.5]))
+#    LIGHT_LIST.append(light1)
+
     # center, radius, color, spectral_color, shininess
-    object1 = objects.Sphere(numpy.array([-30, 10, -80]), 10, numpy.array([1.0, 0.0, 0.0]), numpy.array([0.8, 0.8, 0.8]), 32)
-    object2 = objects.Sphere(numpy.array([0, 10, -80]), 10, numpy.array([0.0, 0.0, 1.0]), numpy.array([0.8, 0.8, 0.8]), 32)
-    object3 = objects.Sphere(numpy.array([-15, 10, -85]), 20, numpy.array([0.0, 1.0, 0.0]), numpy.array([0.8, 0.8, 0.8]), 32)
-    object4 = objects.Sphere(numpy.array([30, 10, -85]), 20, numpy.array([1.0, 1.0, 0.0]), numpy.array([0.8, 0.8, 0.8]), 32)
+    object1 = objects.Sphere(numpy.array([0, 0, -30]), 10, numpy.array([1.0, 0.0, 0.0]), numpy.array([0.8, 0.8, 0.8]), 32)
 
     plane = objects.Plane(numpy.array([0,1,0]), numpy.array([0,-1,-5]), numpy.array([1.0, 0.0, 1.0]), numpy.array([0.8, 0.8, 0.8]), 32)
 
     OBJECT_LIST.append(object1)
-    OBJECT_LIST.append(object2)
-    OBJECT_LIST.append(object3)
-    OBJECT_LIST.append(object4)
     OBJECT_LIST.append(plane)
     
     # position, color, spectral_color
-    light1 = objects.Light(numpy.array([50, 50, 10]), numpy.array([1,1,1]), numpy.array([0.5,0.5,0.5]))
+    light1 = objects.Light(numpy.array([15, 30, -20]), numpy.array([1,1,1]), numpy.array([0.5,0.5,0.5]))
     LIGHT_LIST.append(light1)
         
 def GET_OBJECT_LIST():
