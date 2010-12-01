@@ -15,8 +15,8 @@ HEIGHT = 150
 DEPTH = 100
 VIEWPOINT = numpy.array([0,0,5])
 
-IMAGE_WIDTH = 800
-IMAGE_HEIGHT = 800
+IMAGE_WIDTH = 400
+IMAGE_HEIGHT = 400
 
 RAYS = rays.Rays(WIDTH, HEIGHT, DEPTH, IMAGE_WIDTH, IMAGE_HEIGHT) 
         
@@ -24,39 +24,47 @@ RAYS = rays.Rays(WIDTH, HEIGHT, DEPTH, IMAGE_WIDTH, IMAGE_HEIGHT)
 class MainWindow(pyglet.window.Window):
     def __init__(self):
         super(MainWindow, self).__init__(caption ="pyRayTracer", width=IMAGE_WIDTH, height=IMAGE_HEIGHT, resizable = False)
-        
-        # set the color to be used when glClear() is called
-        #glClearColor(1, 1, 1, 1)  
-               
+              
     def on_draw(self):
         pass
-#        glPointSize(1)            
-#        for i in range(WIDTH):
-#            for j in range(HEIGHT):
-#                d = RAYS.get_ray_direction(i, j)
-#                
-#                object_list = scene.OBJECT_LIST
-#                intersections = []
-#                colors = []
-#                for object in object_list:
-#                    intersection_point = object.intersection_test(d, VIEWPOINT)
-#                    if(intersection_point > 0): 
-#                        intersections.append(intersection_point)                              
-#                        colors.append(lighting.calc_lighting(object, VIEWPOINT + intersection_point * d)) # p(t) = e + td   
-#                        #colors.append(numpy.array([1.0,0,0]))
-#                try:
-#                    assoc = zip(object_list, intersections, colors)
-#                    assoc.sort()
-#                    object_list, intersections, colors = zip(*assoc)
-#                except(ValueError):
-#                    pyglet.graphics.draw(1, GL_POINTS,('v2i', (i,j)),('c3f', scene.BACKGROUND_COLOR))
-#                
-#                if len(intersections) != 0:
-#                    pyglet.graphics.draw(1, GL_POINTS,('v2i', (i,j)),('c3f', colors[0]))
              
     def on_key_release(self, symbol, modifiers):
         # Handle key presses. The following quits when 'q' is pressed
-        if symbol == key.ENTER:
+        if symbol == key.Q:
+            self.render_basic()
+        elif symbol == key.W:
+            self.render_lightning()
+
+    def render_basic(self):
+            glPointSize(1)            
+            for i in range(IMAGE_WIDTH):
+                if (i % 6) == 0:
+                    print (float(i) / float(IMAGE_WIDTH)) * 100
+                    
+                for j in range(IMAGE_HEIGHT):
+                    d = RAYS.get_ray_direction(i, j)
+                    
+                    object_list = scene.OBJECT_LIST
+                    intersections = []
+                    colors = []
+                    for object in object_list:
+                        intersection_point = object.intersection_test(d, VIEWPOINT)
+                        if(intersection_point > 0): 
+                            intersections.append(intersection_point)                              
+                            colors.append(object.color)
+                    try:
+                        assoc = zip(object_list, intersections, colors)
+                        assoc.sort()
+                        object_list, intersections, colors = zip(*assoc)
+                    except(ValueError):
+                        pyglet.graphics.draw(1, GL_POINTS,('v2i', (i,j)),('c3f', scene.BACKGROUND_COLOR))
+                    
+                    if len(intersections) != 0:
+                        pyglet.graphics.draw(1, GL_POINTS,('v2i', (i,j)),('c3f', colors[0]))
+                        
+            print("FINISHED")
+            
+    def render_lightning(self):
             glPointSize(1)            
             for i in range(IMAGE_WIDTH):
                 if (i % 6) == 0:
