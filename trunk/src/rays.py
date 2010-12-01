@@ -1,5 +1,6 @@
 import numpy
-import math
+
+import scene
 
 class Rays():
     '''
@@ -34,7 +35,28 @@ class Rays():
         direction = numpy.array((self.waxis * -self.image_plane_distance) + (self.uaxis * u) + (self.vaxis * v))
         
         return self.normalize(direction)
-                 
+    
+    # returns the first object hit and the intersection_point
+    def shoot_ray(self, origin, direction):  
+        object_list = scene.OBJECT_LIST
+        
+        objects = []
+        intersections = []
+        for object in object_list:
+            intersection_point = object.intersection_test(direction, origin)
+            if(intersection_point > 0): 
+                intersections.append(intersection_point) 
+                objects.append(object)                              
+        try:
+            assoc = zip(objects, intersections)
+            assoc.sort()
+            objects, intersections = zip(*assoc)
+        except(ValueError):
+            return None, None
+        
+        if len(intersections) != 0:
+            return objects[0], intersections[0]
+                   
     def normalize(self, vector):
         distance = numpy.sqrt((vector[0] ** 2) + (vector[1] ** 2) + (vector[2] ** 2))
         

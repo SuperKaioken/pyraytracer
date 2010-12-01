@@ -15,8 +15,8 @@ HEIGHT = 150
 DEPTH = 100
 VIEWPOINT = numpy.array([0,0,5])
 
-IMAGE_WIDTH = 400
-IMAGE_HEIGHT = 400
+IMAGE_WIDTH = 150
+IMAGE_HEIGHT = 150
 
 RAYS = rays.Rays(WIDTH, HEIGHT, DEPTH, IMAGE_WIDTH, IMAGE_HEIGHT) 
         
@@ -34,65 +34,78 @@ class MainWindow(pyglet.window.Window):
             self.render_basic()
         elif symbol == key.W:
             self.render_lightning()
+        elif symbol == key.E:
+            self.render_lighting_shadowing()
 
     def render_basic(self):
-            glPointSize(1)            
-            for i in range(IMAGE_WIDTH):
-                if (i % 6) == 0:
-                    print (float(i) / float(IMAGE_WIDTH)) * 100
+        glPointSize(1)            
+        for i in range(IMAGE_WIDTH):
+            if (i % 6) == 0:
+                print (float(i) / float(IMAGE_WIDTH)) * 100
+                
+            for j in range(IMAGE_HEIGHT):
+                d = RAYS.get_ray_direction(i, j)
+                
+                object_list = scene.OBJECT_LIST
+                intersections = []
+                colors = []
+                for object in object_list:
+                    intersection_point = object.intersection_test(d, VIEWPOINT)
+                    if(intersection_point > 0): 
+                        intersections.append(intersection_point)                              
+                        colors.append(object.color)
+                try:
+                    assoc = zip(object_list, intersections, colors)
+                    assoc.sort()
+                    object_list, intersections, colors = zip(*assoc)
+                except(ValueError):
+                    pyglet.graphics.draw(1, GL_POINTS,('v2i', (i,j)),('c3f', scene.BACKGROUND_COLOR))
+                
+                if len(intersections) != 0:
+                    pyglet.graphics.draw(1, GL_POINTS,('v2i', (i,j)),('c3f', colors[0]))
                     
-                for j in range(IMAGE_HEIGHT):
-                    d = RAYS.get_ray_direction(i, j)
-                    
-                    object_list = scene.OBJECT_LIST
-                    intersections = []
-                    colors = []
-                    for object in object_list:
-                        intersection_point = object.intersection_test(d, VIEWPOINT)
-                        if(intersection_point > 0): 
-                            intersections.append(intersection_point)                              
-                            colors.append(object.color)
-                    try:
-                        assoc = zip(object_list, intersections, colors)
-                        assoc.sort()
-                        object_list, intersections, colors = zip(*assoc)
-                    except(ValueError):
-                        pyglet.graphics.draw(1, GL_POINTS,('v2i', (i,j)),('c3f', scene.BACKGROUND_COLOR))
-                    
-                    if len(intersections) != 0:
-                        pyglet.graphics.draw(1, GL_POINTS,('v2i', (i,j)),('c3f', colors[0]))
-                        
-            print("FINISHED")
+        print("FINISHED")
             
     def render_lightning(self):
-            glPointSize(1)            
-            for i in range(IMAGE_WIDTH):
-                if (i % 6) == 0:
-                    print (float(i) / float(IMAGE_WIDTH)) * 100
+        glPointSize(1)            
+        for i in range(IMAGE_WIDTH):
+            if (i % 6) == 0:
+                print (float(i) / float(IMAGE_WIDTH)) * 100
+                
+            for j in range(IMAGE_HEIGHT):
+                d = RAYS.get_ray_direction(i, j)
+                
+                object, intersection_point = RAYS.shoot_ray(VIEWPOINT, d)
+                
+                if object == None:
+                    pyglet.graphics.draw(1, GL_POINTS,('v2i', (i,j)),('c3f', scene.BACKGROUND_COLOR))
+                else:
+                    color = lighting.calc_lighting(object, VIEWPOINT + intersection_point * d)
+                    pyglet.graphics.draw(1, GL_POINTS,('v2i', (i,j)),('c3f', color))   
                     
-                for j in range(IMAGE_HEIGHT):
-                    d = RAYS.get_ray_direction(i, j)
+        print("FINISHED")
+            
+    def render_lighting_shadowing(self):
+        glPointSize(1)            
+        for i in range(IMAGE_WIDTH):
+            if (i % 6) == 0:
+                print (float(i) / float(IMAGE_WIDTH)) * 100
+                
+            for j in range(IMAGE_HEIGHT):
+                d = RAYS.get_ray_direction(i, j)
+                
+                object, intersection_point = RAYS.shoot_ray(VIEWPOINT, d)
+                
+                if object == None:
+                    pyglet.graphics.draw(1, GL_POINTS,('v2i', (i,j)),('c3f', scene.BACKGROUND_COLOR))
+                else:
+                    if objects.in_shadow(VIEWPOINT + intersection_point * d, RAYS) == True:
+                        pyglet.graphics.draw(1, GL_POINTS,('v2i', (i,j)),('c3f', scene.AMBIENT))  
+                    else:
+                        color = lighting.calc_lighting(object, VIEWPOINT + intersection_point * d)
+                        pyglet.graphics.draw(1, GL_POINTS,('v2i', (i,j)),('c3f', color))   
                     
-                    object_list = scene.OBJECT_LIST
-                    intersections = []
-                    colors = []
-                    for object in object_list:
-                        intersection_point = object.intersection_test(d, VIEWPOINT)
-                        if(intersection_point > 0): 
-                            intersections.append(intersection_point)                              
-                            colors.append(lighting.calc_lighting(object, VIEWPOINT + intersection_point * d)) # p(t) = e + td   
-                            #colors.append(numpy.array([1.0,0,0]))
-                    try:
-                        assoc = zip(object_list, intersections, colors)
-                        assoc.sort()
-                        object_list, intersections, colors = zip(*assoc)
-                    except(ValueError):
-                        pyglet.graphics.draw(1, GL_POINTS,('v2i', (i,j)),('c3f', scene.BACKGROUND_COLOR))
-                    
-                    if len(intersections) != 0:
-                        pyglet.graphics.draw(1, GL_POINTS,('v2i', (i,j)),('c3f', colors[0]))
-                        
-            print("FINISHED")
+        print("FINISHED")
     
 def render_PIL(filepath):
     img = Image.new("RGB", (IMAGE_WIDTH, IMAGE_HEIGHT))

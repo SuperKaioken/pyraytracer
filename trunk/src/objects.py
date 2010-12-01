@@ -1,6 +1,8 @@
 import numpy
 import math
 
+import scene
+
 def normalize(vector):
     distance = numpy.sqrt((vector[0] ** 2) + (vector[1] ** 2) + (vector[2] ** 2))
     
@@ -8,7 +10,17 @@ def normalize(vector):
         return numpy.array([vector[0] / distance, vector[1] / distance, vector[2] / distance]) 
     except(ZeroDivisionError):
         return numpy.array([0, 0, 0]) 
-        
+
+def in_shadow(point, rays):
+    d = normalize(scene.GET_LIGHT_LIST()[0].position - point)
+    
+    object, intersection_point = rays.shoot_ray(point, d)
+    
+    if object == None:
+        return False
+    else:
+        return True 
+            
 class Light():
     
     def __init__(self, position, color, spectral_color):
