@@ -11,10 +11,10 @@ def normalize(vector):
     except(ZeroDivisionError):
         return numpy.array([0, 0, 0]) 
 
-def in_shadow(point, rays):
-    d = normalize(scene.GET_LIGHT_LIST()[0].position - point)
+def in_shadow(point, rays, id):
+    d = numpy.array(normalize(point - scene.GET_LIGHT_LIST()[0].position))
     
-    object, intersection_point = rays.shoot_ray(point, d)
+    object, intersection_point = rays.shoot_ray(point, d, id)
     
     if object == None:
         return False
@@ -34,7 +34,7 @@ class Sphere():
     classdocs
     '''
 
-    def __init__(self, center, radius, color, spectral_color, shininess):
+    def __init__(self, center, radius, color, spectral_color, shininess, timestamp):
         '''
         Constructor 
         '''
@@ -43,6 +43,7 @@ class Sphere():
         self.color = color
         self.spectral_color = spectral_color
         self.shininess = shininess
+        self.id = timestamp
         
     def intersection_test(self, d, e):
         discriminant = self.discriminant_test(d, e)        
@@ -64,12 +65,13 @@ class Sphere():
     
 class Plane():
     
-    def __init__(self, normal, point_on_plane, color, spectral_color, shininess):
+    def __init__(self, normal, point_on_plane, color, spectral_color, shininess, id):
         self.normal = normal
         self.point_on_plane = point_on_plane
         self.color = color
         self.spectral_color = spectral_color
         self.shininess = shininess
+        self.id = id
         
     def intersection_test(self, d, e):
         denom = numpy.dot(normalize(d), normalize(self.normal))

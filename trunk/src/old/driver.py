@@ -7,6 +7,7 @@ from pyglet.gl import *
 import numpy
 import winsound
 import Image
+import threading
 
 import scene, rays, objects, lighting
 
@@ -15,8 +16,8 @@ HEIGHT = 150
 DEPTH = 100
 VIEWPOINT = numpy.array([0,0,5])
 
-IMAGE_WIDTH = 150
-IMAGE_HEIGHT = 150
+IMAGE_WIDTH = 300
+IMAGE_HEIGHT = 300
 
 RAYS = rays.Rays(WIDTH, HEIGHT, DEPTH, IMAGE_WIDTH, IMAGE_HEIGHT) 
         
@@ -41,7 +42,7 @@ class MainWindow(pyglet.window.Window):
         glPointSize(1)            
         for i in range(IMAGE_WIDTH):
             if (i % 6) == 0:
-                print (float(i) / float(IMAGE_WIDTH)) * 100
+                print str((float(i) / float(IMAGE_WIDTH)) * 100) + " %"
                 
             for j in range(IMAGE_HEIGHT):
                 d = RAYS.get_ray_direction(i, j)
@@ -70,12 +71,12 @@ class MainWindow(pyglet.window.Window):
         glPointSize(1)            
         for i in range(IMAGE_WIDTH):
             if (i % 6) == 0:
-                print (float(i) / float(IMAGE_WIDTH)) * 100
+                print str((float(i) / float(IMAGE_WIDTH)) * 100) + " %"
                 
             for j in range(IMAGE_HEIGHT):
                 d = RAYS.get_ray_direction(i, j)
                 
-                object, intersection_point = RAYS.shoot_ray(VIEWPOINT, d)
+                object, intersection_point = RAYS.shoot_ray(VIEWPOINT, d, None)
                 
                 if object == None:
                     pyglet.graphics.draw(1, GL_POINTS,('v2i', (i,j)),('c3f', scene.BACKGROUND_COLOR))
@@ -89,18 +90,19 @@ class MainWindow(pyglet.window.Window):
         glPointSize(1)            
         for i in range(IMAGE_WIDTH):
             if (i % 6) == 0:
-                print (float(i) / float(IMAGE_WIDTH)) * 100
+                print str((float(i) / float(IMAGE_WIDTH)) * 100) + " %"
                 
             for j in range(IMAGE_HEIGHT):
                 d = RAYS.get_ray_direction(i, j)
                 
-                object, intersection_point = RAYS.shoot_ray(VIEWPOINT, d)
+                object, intersection_point = RAYS.shoot_ray(VIEWPOINT, d, None)
                 
                 if object == None:
                     pyglet.graphics.draw(1, GL_POINTS,('v2i', (i,j)),('c3f', scene.BACKGROUND_COLOR))
                 else:
-                    if objects.in_shadow(VIEWPOINT + intersection_point * d, RAYS) == True:
-                        pyglet.graphics.draw(1, GL_POINTS,('v2i', (i,j)),('c3f', scene.AMBIENT))  
+                    if objects.in_shadow(VIEWPOINT + intersection_point * d, RAYS, object.id) == True:
+                        print 'in shadow'
+                        pyglet.graphics.draw(1, GL_POINTS,('v2i', (i,j)),('c3f', (0,255,0)))
                     else:
                         color = lighting.calc_lighting(object, VIEWPOINT + intersection_point * d)
                         pyglet.graphics.draw(1, GL_POINTS,('v2i', (i,j)),('c3f', color))   

@@ -36,17 +36,20 @@ class Rays():
         
         return self.normalize(direction)
     
-    # returns the first object hit and the intersection_point
-    def shoot_ray(self, origin, direction):  
+    # returns the first object hit and the corresponding intersection_point
+    def shoot_ray(self, origin, direction, id):  
         object_list = scene.OBJECT_LIST
         
         objects = []
         intersections = []
         for object in object_list:
-            intersection_point = object.intersection_test(direction, origin)
-            if(intersection_point > 0): 
-                intersections.append(intersection_point) 
-                objects.append(object)                              
+            if object.id == id: # don't test against self
+                pass
+            else:
+                intersection_point = object.intersection_test(direction, origin)
+                if(intersection_point > 0): 
+                    intersections.append(intersection_point) 
+                    objects.append(object)                              
         try:
             assoc = zip(objects, intersections)
             assoc.sort()

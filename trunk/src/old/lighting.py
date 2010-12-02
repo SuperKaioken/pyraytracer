@@ -31,9 +31,9 @@ def calc_Is(ks, n, h, s, Isi):
     return Isi * (numpy.dot(n, h) ** s)
 
 def normalize(vector):
-    distance = numpy.sqrt((vector[0] ** 2) + (vector[1] ** 2) + (vector[2] ** 2))
+    magnitude = numpy.sqrt((vector[0] ** 2) + (vector[1] ** 2) + (vector[2] ** 2))
     
     try:   
-        return numpy.array([vector[0] / distance, vector[1] / distance, vector[2] / distance]) 
+        return numpy.array([vector[0] / magnitude, vector[1] / magnitude, vector[2] / magnitude]) 
     except(ZeroDivisionError):
         return numpy.array([0, 0, 0]) 
