@@ -1,5 +1,5 @@
 from __future__ import division
-import time
+import random
 import pyglet
 from pyglet.window import key
 from pyglet.window import mouse
@@ -33,13 +33,13 @@ class Scene():
         self.objects = []
         self.lights = []
         self.background_color = numpy.array([0,0,0])
-        self.ambient_color = numpy.array([0.5,0.5,0.5])
+        self.ambient_color = numpy.array([0.3,0.3,0.3])
         
         # populate with object(s) and light(s)
-        self.add_object(Sphere(numpy.array([-45,0, -40]), 30, numpy.array([1.0,0.0,0.0]), numpy.array([0.8,0.8,0.8]), 32, 50, time.time()))
-        self.add_object(Sphere(numpy.array([0,0, -10]), 10, numpy.array([0.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, 50, time.time()))
+        self.add_object(Sphere(numpy.array([-45,0, -40]), 30, numpy.array([1.0,0.0,0.0]), numpy.array([0.8,0.8,0.8]), 32, 50, True, random.random()))
+        self.add_object(Sphere(numpy.array([0,0, -10]), 10, numpy.array([0.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, 50, False, random.random()))
         #self.add_object(Plane(numpy.array([0,-20,-10]), numpy.array([0,1,0.0001]), numpy.array([1.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, time.time()))
-        self.add_light(Light(numpy.array([45,0,0]), numpy.array([1,1,1]), numpy.array([0.5,0.5,0.5])))
+        self.add_light(Light(numpy.array([45,40,0]), numpy.array([1,1,1]), numpy.array([0.5,0.5,0.5])))
         
     def add_object(self, object):
         self.objects.append(object)
@@ -72,7 +72,6 @@ class Scene():
         object = hit_objects[0]
         color = object.color
         point = origin + intersections[0] * dir
-        print point
         
         # calculate lighting effects
         if options.find('l') != -1:
@@ -81,9 +80,14 @@ class Scene():
         # calculate transparency
         if options.find('t') != -1:
             color = (color + self.background_color) / 2
+
+        # calculate reflection
+        if options.find('r') != -1:
+            if object.reflective == True:
+                self.shoot_reflection_ray(point, dir, object.calc_normal(point), id)
          
         # determine if in shadow
-        if (self.shoot_shadow_ray(point, normalize(self.lights[0].position - point), object.id)) == True:
+        if self.shoot_shadow_ray(point, normalize(self.lights[0].position - point), object.id) == True:
             color = self.ambient_color * object.color
 
         return color
@@ -93,6 +97,11 @@ class Scene():
         
         # see which objects the ray hits, other than the object the ray originated from
         for object in self.objects:
+            print object
+            print object.id
+            print id
+            print '\n'
+            
             if object.id != id:
                 intersection_value = object.hit_test(origin, dir)
                 if(intersection_value > 0):                              
@@ -105,7 +114,11 @@ class Scene():
             return False
         
     def shoot_transparency_ray(self, origin, dir, id):
-        
+        pass
+    
+    def shoot_reflection_ray(self, origin, incident, normal, id):
+        angle = numpy.rad2deg(numpy.arccos(numpy.dot(incident, normal)))
+        print angle
 
     def __calc_lighting(self, object, point):
         light_position = self.lights[0].position
@@ -137,10 +150,11 @@ class Scene():
         return Isi * (numpy.dot(n, h) ** s)
                    
 class Surface():
-    def __init__(self, color, spectral_color, shininess, id):
+    def __init__(self, color, spectral_color, shininess, reflective, id):
         self.color = color
         self.spectral_color = spectral_color
         self.shininess = shininess
+        self.reflective = reflective
         self.id = id
     
     def hit_test(self):
@@ -150,8 +164,8 @@ class Surface():
         pass
     
 class Sphere(Surface):
-    def __init__(self, center, radius, color, spectral_color, shininess, transparency, id):
-        Surface.__init__(self, color, spectral_color, shininess, id)
+    def __init__(self, center, radius, color, spectral_color, shininess, transparency, reflective, id):
+        Surface.__init__(self, color, spectral_color, shininess, reflective, id)
         self.center = center
         self.radius = radius 
         
@@ -218,6 +232,8 @@ class MainWindow(pyglet.window.Window):
         elif symbol == key.E:
             self.render_lighting_shadowing()
         elif symbol == key.R:
+            self.render_lighting_reflection()
+        elif symbol == key.T:
             self.render_lighting_transparency()
 
     def render_basic(self):
@@ -288,7 +304,40 @@ class MainWindow(pyglet.window.Window):
     
     def render_lighting_shadowing(self):
         pass
-    
+
+    def render_lighting_reflection(self):
+        left = -(image_plane_width / 2)
+        right = image_plane_width / 2
+        bottom = -(image_plane_height / 2)
+        top = image_plane_height / 2
+        
+        pixels = []
+        colors = []
+        for i in range(window_width):
+            # periodically print the percent completed
+            if (i % 10) == 0:
+                print str((float(i) / float(window_width)) * 100) + " %"
+                
+            for j in range(window_height):
+                x = left + (((right - left)*(i + 0.5)) / window_width)
+                y = bottom + (((top - bottom)*(j + 0.5)) / window_height)
+                
+                #dir = normalize(numpy.array((x_axis * x) + (y_axis * y) + (z_axis * -viewpoint[2])))            
+                #ray_color = scene.shoot_ray(viewpoint, dir)
+            
+                dir = normalize(numpy.array([0,0,-1]))
+                ortho_origin = numpy.array([x,y,0])
+                ray_color = self.scene.shoot_ray(ortho_origin, dir, 'lr')
+                
+                # it is much faster to create the list of pixels and colors, then call pyglet.graphics.draw once at the end
+                pixels.append(i)
+                pixels.append(j)
+                colors.append(ray_color[0])
+                colors.append(ray_color[1])
+                colors.append(ray_color[2])
+                
+        pyglet.graphics.draw(int(len(pixels)/2), GL_POINTS,('v2i', pixels),('c3f', colors))
+        
     def render_lighting_transparency(self):
         left = -(image_plane_width / 2)
         right = image_plane_width / 2
