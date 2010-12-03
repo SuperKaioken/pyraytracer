@@ -1,6 +1,10 @@
-from threading import Thread
+from multiprocessing import Process
+import os
+import time
 
-def increment(number):
-    number = number + 1
+import Image
 
-
+try:
+    img = Image.open('asdfasdf')
+except(IOError)
+    

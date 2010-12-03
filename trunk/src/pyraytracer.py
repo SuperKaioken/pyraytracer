@@ -4,6 +4,7 @@ from pyglet.window import key
 from pyglet.window import mouse
 from pyglet.gl import *
 import numpy
+import Image
 
 image_plane_width = 150
 image_plane_height = 150
@@ -34,9 +35,9 @@ class Scene():
         self.ambient_color = numpy.array([0.5,0.5,0.5])
         
         # populate with object(s) and light(s)
-        self.add_object(Sphere(numpy.array([0,15,-20]), 19, numpy.array([1.0,0.0,0.0]), numpy.array([0.8,0.8,0.8]), 32))
-        self.add_object(Plane(numpy.array([0,-1,-10]), numpy.array([0,1,0]), numpy.array([1.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32))
-        self.add_light(Light(numpy.array([0,25,-30]), numpy.array([1,1,1]), numpy.array([0.5,0.5,0.5])))
+        self.add_object(Sphere(numpy.array([0,0, -155]), 10, numpy.array([1.0,0.0,0.0]), numpy.array([0.8,0.8,0.8]), 32))
+        self.add_object(Plane(numpy.array([0,-1,0]), numpy.array([0,1,1]), numpy.array([1.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32))
+        self.add_light(Light(numpy.array([0,30,0]), numpy.array([1,1,1]), numpy.array([0.5,0.5,0.5])))
         
     def add_object(self, object):
         self.objects.append(object)
@@ -87,6 +88,7 @@ class Scene():
                 hit_objects.append(object)
                 
         if len(hit_objects) > 0:
+            print 'in shadow'
             return True
         else:
             return False
@@ -162,6 +164,18 @@ class Plane(Surface):
         self.point = point
         self.normal = normal
         
+#    def hit_test(self, origin, dir):
+#        denom = numpy.dot(normalize(dir), normalize(self.normal))
+#        if denom == 0:
+#            return 0
+#        else:
+#            print 'in plane'
+#            t = numpy.dot(normalize(self.normal), normalize((self.point - origin))) / denom
+#            if t < 0:
+#                return t
+#            else:
+#                return t
+
     def hit_test(self, origin, dir):
         denom = numpy.dot(normalize(dir), normalize(self.normal))
         if denom == 0:
@@ -169,7 +183,7 @@ class Plane(Surface):
         else:
             t = numpy.dot(normalize(self.normal), normalize((self.point - origin))) / denom
             if t < 0:
-                return t
+                return -t
             else:
                 return t
             
@@ -220,9 +234,12 @@ class MainWindow(pyglet.window.Window):
                 x = left + (((right - left)*(i + 0.5)) / window_width)
                 y = bottom + (((top - bottom)*(j + 0.5)) / window_height)
                 
-                dir = normalize(numpy.array((x_axis * x) + (y_axis * y) + (z_axis * -viewpoint[2])))
-                                
-                ray_color = self.scene.shoot_ray(viewpoint, dir)
+                #dir = normalize(numpy.array((x_axis * x) + (y_axis * y) + (z_axis * -viewpoint[2])))            
+                #ray_color = scene.shoot_ray(viewpoint, dir)
+            
+                dir = normalize(numpy.array([0,0,-1]))
+                ortho_origin = numpy.array([x,y,0])
+                ray_color = scene.shoot_ray(ortho_origin, dir)
                 
                 pyglet.graphics.draw(1, GL_POINTS,('v2i', (i,j)),('c3f', ray_color))
     
@@ -231,7 +248,41 @@ class MainWindow(pyglet.window.Window):
     
     def render_lighting_shadowing(self):
         pass
+
+def render_PIL(scene):
+    img = Image.new("RGB", (window_width, window_height))
+    img_pix = img.load()
+     
+    left = -(image_plane_width / 2)
+    right = image_plane_width / 2
+    bottom = -(image_plane_height / 2)
+    top = image_plane_height / 2
     
+    for i in range(window_width):
+        # periodically print the percent completed
+        if (i % 10) == 0:
+            print str((float(i) / float(window_width)) * 100) + " %"
+            
+        for j in range(window_height):
+            x = left + (((right - left)*(i + 0.5)) / window_width)
+            y = bottom + (((top - bottom)*(j + 0.5)) / window_height)
+            
+            #dir = normalize(numpy.array((x_axis * x) + (y_axis * y) + (z_axis * -viewpoint[2])))            
+            #ray_color = scene.shoot_ray(viewpoint, dir)
+        
+            dir = normalize(numpy.array([0,0,-1]))
+            ortho_origin = numpy.array([x,y,0])
+            ray_color = scene.shoot_ray(ortho_origin, dir)
+            
+            #img.putpixel((i,j), (ray_color[0] * 255, ray_color[1] * 255, ray_color[2] * 255)) # since we are using floats, must convert to integer
+            img_pix[i,j] = (ray_color[0] * 255, ray_color[1] * 255, ray_color[2] * 255)
+     
+    img.save("../../test.bmp")
+        
 if __name__ == '__main__':
-    window = MainWindow()
-    pyglet.app.run()
+    scene = Scene()
+    
+    render_PIL(scene)
+    
+
+    
