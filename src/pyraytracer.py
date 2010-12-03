@@ -1,4 +1,5 @@
 from __future__ import division
+import time
 import pyglet
 from pyglet.window import key
 from pyglet.window import mouse
@@ -8,8 +9,8 @@ import Image
 
 image_plane_width = 150
 image_plane_height = 150
-window_width = 150
-window_height = 150
+window_width = 200
+window_height = 200
 viewpoint = numpy.array([0,0,20])
 
 x_axis = numpy.array([1,0,0])
@@ -35,9 +36,10 @@ class Scene():
         self.ambient_color = numpy.array([0.5,0.5,0.5])
         
         # populate with object(s) and light(s)
-        self.add_object(Sphere(numpy.array([0,0, -155]), 10, numpy.array([1.0,0.0,0.0]), numpy.array([0.8,0.8,0.8]), 32))
-        self.add_object(Plane(numpy.array([0,-1,0]), numpy.array([0,1,1]), numpy.array([1.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32))
-        self.add_light(Light(numpy.array([0,30,0]), numpy.array([1,1,1]), numpy.array([0.5,0.5,0.5])))
+        self.add_object(Sphere(numpy.array([-45,0, -40]), 30, numpy.array([1.0,0.0,0.0]), numpy.array([0.8,0.8,0.8]), 32, 50, time.time()))
+        self.add_object(Sphere(numpy.array([0,0, -10]), 10, numpy.array([0.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, 50, time.time()))
+        #self.add_object(Plane(numpy.array([0,-20,-10]), numpy.array([0,1,0.0001]), numpy.array([1.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, time.time()))
+        self.add_light(Light(numpy.array([45,0,0]), numpy.array([1,1,1]), numpy.array([0.5,0.5,0.5])))
         
     def add_object(self, object):
         self.objects.append(object)
@@ -45,7 +47,7 @@ class Scene():
     def add_light(self, light):
         self.lights.append(light)
         
-    def shoot_ray(self, origin, dir):
+    def shoot_ray(self, origin, dir, options):
         intersections = []
         hit_objects = []
         color = self.background_color
@@ -65,33 +67,45 @@ class Scene():
         # if a ValueError is thrown then no objects were hit
         except(ValueError):
             return color
-        color = hit_objects[0].color
+        
+        # if we get to here then at least one object was hit
+        object = hit_objects[0]
+        color = object.color
+        point = origin + intersections[0] * dir
+        print point
         
         # calculate lighting effects
-        color = self.__calc_lighting(hit_objects[0], origin + intersections[0] * dir)
-        
+        if options.find('l') != -1:
+            color = self.__calc_lighting(object, point)
+
+        # calculate transparency
+        if options.find('t') != -1:
+            color = (color + self.background_color) / 2
+         
         # determine if in shadow
-        if (self.shoot_shadow_ray(origin + intersections[0] * dir, normalize(self.lights[0].position - (origin + intersections[0] * dir)), 2)) == True:
-            color = self.ambient_color * hit_objects[0].color
-            
+        if (self.shoot_shadow_ray(point, normalize(self.lights[0].position - point), object.id)) == True:
+            color = self.ambient_color * object.color
+
         return color
     
-    def shoot_shadow_ray(self, origin, dir, offset):
-        intersections = []
+    def shoot_shadow_ray(self, origin, dir, id):
         hit_objects = []
         
-        # see which objects the ray hits
+        # see which objects the ray hits, other than the object the ray originated from
         for object in self.objects:
-            intersection_value = object.hit_test(origin, dir)
-            if(intersection_value > offset): 
-                intersections.append(intersection_value)                              
-                hit_objects.append(object)
+            if object.id != id:
+                intersection_value = object.hit_test(origin, dir)
+                if(intersection_value > 0):                              
+                    hit_objects.append(object)
                 
         if len(hit_objects) > 0:
             print 'in shadow'
             return True
         else:
             return False
+        
+    def shoot_transparency_ray(self, origin, dir, id):
+        
 
     def __calc_lighting(self, object, point):
         light_position = self.lights[0].position
@@ -123,10 +137,11 @@ class Scene():
         return Isi * (numpy.dot(n, h) ** s)
                    
 class Surface():
-    def __init__(self, color, spectral_color, shininess):
+    def __init__(self, color, spectral_color, shininess, id):
         self.color = color
         self.spectral_color = spectral_color
         self.shininess = shininess
+        self.id = id
     
     def hit_test(self):
         pass
@@ -135,8 +150,8 @@ class Surface():
         pass
     
 class Sphere(Surface):
-    def __init__(self, center, radius, color, spectral_color, shininess):
-        Surface.__init__(self, color, spectral_color, shininess)
+    def __init__(self, center, radius, color, spectral_color, shininess, transparency, id):
+        Surface.__init__(self, color, spectral_color, shininess, id)
         self.center = center
         self.radius = radius 
         
@@ -159,33 +174,17 @@ class Sphere(Surface):
         return (point - self.center) / self.radius
     
 class Plane(Surface):
-    def __init__(self, point, normal, color, spectral_color, shininess):
-        Surface.__init__(self, color, spectral_color, shininess)
+    def __init__(self, point, normal, color, spectral_color, shininess, id):
+        Surface.__init__(self, color, spectral_color, shininess, id)
         self.point = point
         self.normal = normal
-        
-#    def hit_test(self, origin, dir):
-#        denom = numpy.dot(normalize(dir), normalize(self.normal))
-#        if denom == 0:
-#            return 0
-#        else:
-#            print 'in plane'
-#            t = numpy.dot(normalize(self.normal), normalize((self.point - origin))) / denom
-#            if t < 0:
-#                return t
-#            else:
-#                return t
 
     def hit_test(self, origin, dir):
         denom = numpy.dot(normalize(dir), normalize(self.normal))
         if denom == 0:
-            return 0
+            return -1
         else:
-            t = numpy.dot(normalize(self.normal), normalize((self.point - origin))) / denom
-            if t < 0:
-                return -t
-            else:
-                return t
+            return numpy.dot(normalize(self.normal), normalize((self.point - origin))) / denom
             
     def calc_normal(self, point):
         return self.normal
@@ -218,6 +217,8 @@ class MainWindow(pyglet.window.Window):
             self.render_lighting()
         elif symbol == key.E:
             self.render_lighting_shadowing()
+        elif symbol == key.R:
+            self.render_lighting_transparency()
 
     def render_basic(self):
         left = -(image_plane_width / 2)
@@ -225,6 +226,8 @@ class MainWindow(pyglet.window.Window):
         bottom = -(image_plane_height / 2)
         top = image_plane_height / 2
         
+        pixels = []
+        colors = []
         for i in range(window_width):
             # periodically print the percent completed
             if (i % 10) == 0:
@@ -239,15 +242,85 @@ class MainWindow(pyglet.window.Window):
             
                 dir = normalize(numpy.array([0,0,-1]))
                 ortho_origin = numpy.array([x,y,0])
-                ray_color = scene.shoot_ray(ortho_origin, dir)
+                ray_color = self.scene.shoot_ray(ortho_origin, dir, '')
                 
-                pyglet.graphics.draw(1, GL_POINTS,('v2i', (i,j)),('c3f', ray_color))
-    
+                # it is much faster to create the list of pixels and colors, then call pyglet.graphics.draw once at the end
+                pixels.append(i)
+                pixels.append(j)
+                colors.append(ray_color[0])
+                colors.append(ray_color[1])
+                colors.append(ray_color[2])
+                
+        pyglet.graphics.draw(int(len(pixels)/2), GL_POINTS,('v2i', pixels),('c3f', colors))
+        
     def render_lighting(self):
-        pass
+        left = -(image_plane_width / 2)
+        right = image_plane_width / 2
+        bottom = -(image_plane_height / 2)
+        top = image_plane_height / 2
+        
+        pixels = []
+        colors = []
+        for i in range(window_width):
+            # periodically print the percent completed
+            if (i % 10) == 0:
+                print str((float(i) / float(window_width)) * 100) + " %"
+                
+            for j in range(window_height):
+                x = left + (((right - left)*(i + 0.5)) / window_width)
+                y = bottom + (((top - bottom)*(j + 0.5)) / window_height)
+                
+                #dir = normalize(numpy.array((x_axis * x) + (y_axis * y) + (z_axis * -viewpoint[2])))            
+                #ray_color = scene.shoot_ray(viewpoint, dir)
+            
+                dir = normalize(numpy.array([0,0,-1]))
+                ortho_origin = numpy.array([x,y,0])
+                ray_color = self.scene.shoot_ray(ortho_origin, dir, 'l')
+                
+                # it is much faster to create the list of pixels and colors, then call pyglet.graphics.draw once at the end
+                pixels.append(i)
+                pixels.append(j)
+                colors.append(ray_color[0])
+                colors.append(ray_color[1])
+                colors.append(ray_color[2])
+                
+        pyglet.graphics.draw(int(len(pixels)/2), GL_POINTS,('v2i', pixels),('c3f', colors))
     
     def render_lighting_shadowing(self):
         pass
+    
+    def render_lighting_transparency(self):
+        left = -(image_plane_width / 2)
+        right = image_plane_width / 2
+        bottom = -(image_plane_height / 2)
+        top = image_plane_height / 2
+        
+        pixels = []
+        colors = []
+        for i in range(window_width):
+            # periodically print the percent completed
+            if (i % 10) == 0:
+                print str((float(i) / float(window_width)) * 100) + " %"
+                
+            for j in range(window_height):
+                x = left + (((right - left)*(i + 0.5)) / window_width)
+                y = bottom + (((top - bottom)*(j + 0.5)) / window_height)
+                
+                #dir = normalize(numpy.array((x_axis * x) + (y_axis * y) + (z_axis * -viewpoint[2])))            
+                #ray_color = scene.shoot_ray(viewpoint, dir)
+            
+                dir = normalize(numpy.array([0,0,-1]))
+                ortho_origin = numpy.array([x,y,0])
+                ray_color = self.scene.shoot_ray(ortho_origin, dir, 'lt')
+                
+                # it is much faster to create the list of pixels and colors, then call pyglet.graphics.draw once at the end
+                pixels.append(i)
+                pixels.append(j)
+                colors.append(ray_color[0])
+                colors.append(ray_color[1])
+                colors.append(ray_color[2])
+                
+        pyglet.graphics.draw(int(len(pixels)/2), GL_POINTS,('v2i', pixels),('c3f', colors))  
 
 def render_PIL(scene):
     img = Image.new("RGB", (window_width, window_height))
@@ -278,11 +351,14 @@ def render_PIL(scene):
             img_pix[i,j] = (ray_color[0] * 255, ray_color[1] * 255, ray_color[2] * 255)
      
     img.save("../../test.bmp")
+    print "Finished"
         
 if __name__ == '__main__':
-    scene = Scene()
+    window = MainWindow()
+    pyglet.app.run()
     
-    render_PIL(scene)
+#    scene = Scene()
+#    render_PIL(scene)
     
 
     
