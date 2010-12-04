@@ -36,9 +36,9 @@ class Scene():
         self.ambient_color = numpy.array([0.1,0.1,0.1])
         
         # populate with object(s) and light(s)
-        self.add_object(Sphere(numpy.array([0,0, -305]), 260, numpy.array([1.0,0.0,0.0]), numpy.array([0.8,0.8,0.8]), 32, 50, True, random.random()))
-        self.add_object(Sphere(numpy.array([30,0, -11]), 10, numpy.array([0.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, 50, False, random.random()))
-        self.add_object(Plane(numpy.array([-1000,0,-10]), numpy.array([1,0,0]), numpy.array([1.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, True, random.random()))
+        self.add_object(Sphere(numpy.array([0,0, -305]), 260, numpy.array([1.0,0.0,0.0]), numpy.array([0.8,0.8,0.8]), 32, 0, True, random.random()))
+        self.add_object(Sphere(numpy.array([30,0, -20]), 19, numpy.array([0.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, 1.51, False, random.random()))
+        #self.add_object(Plane(numpy.array([-1000,0,-10]), numpy.array([1,0,0]), numpy.array([1.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, True, random.random()))
         self.add_light(Light(numpy.array([200,50,50]), numpy.array([1,1,1]), numpy.array([0.5,0.5,0.5])))
         
     def add_object(self, object):
@@ -78,8 +78,10 @@ class Scene():
             color = self.__calc_lighting(object, point)
 
         # calculate transparency
-        if options.find('t') != -1:
-            color = (color + self.background_color) / 2
+        if options.find('t') != -1:            
+            if object.transparency >= 1:
+                color = self.shoot_transparency_ray(object, point, dir, object.calc_normal(point), id)
+                #color = (color + self.background_color) / 2
 
         # calculate reflection
         if options.find('r') != -1:
@@ -107,8 +109,52 @@ class Scene():
         else:
             return False
         
-    def shoot_transparency_ray(self, origin, dir, id):
-        pass
+    def shoot_transparency_ray(self, object, origin, dir, normal, id):
+        n = 1.00 # refractive index of air
+        nt = 1.51  # refractive index of window glass
+        
+        #book's way
+        sqrt = 1 - (n**2 * (1-(numpy.dot(dir,normal)**2))) / nt**2                
+        if(sqrt < 0):       
+            return 0 #All energy REFLECTED, no refracted ray
+        else:
+            firstPart = n * (dir - normal*(numpy.dot(dir,normal)))/nt
+            secondPart = n * sqrt
+            tresult = firstPart - secondPart
+            
+            intersections = []
+            hit_objects = []
+            color = self.background_color
+            
+            # see which objects the ray hits
+            for object in self.objects:
+                intersection_value = object.hit_test(origin, tresult)
+                if(intersection_value > 0): 
+                    intersections.append(intersection_value)                              
+                    hit_objects.append(object)
+                    
+            # sort to find the closest object
+            try:
+                assoc = zip(intersections, hit_objects)
+                assoc.sort()
+                intersections, hit_objects = zip(*assoc)
+            # if a ValueError is thrown then no objects were hit
+            except(ValueError):
+                return color
+            
+            # if we get to here then at least one object was hit
+            object = hit_objects[0]
+            color = object.color
+            point = origin + intersections[0] * dir
+            
+            # calculate lighting effects
+            color = self.__calc_lighting(object, point)
+            
+            c = numpy.dot(tresult, normal)
+            R0 = ((n-1)**2) / (n+1)**2
+            R = (R0 + (1-R0))/((1-c)**5)
+            return ((R * object.color) + ((1-R) * color)) 
+                        
     
     def shoot_reflection_ray(self, origin, incident, normal, id):
         angle = numpy.rad2deg(numpy.arccos(numpy.dot(incident, normal)))
@@ -145,12 +191,14 @@ class Scene():
         return Isi * (numpy.abs(numpy.dot(n, h)) ** s)
                    
 class Surface():
-    def __init__(self, color, spectral_color, shininess, reflective, id):
+    def __init__(self, color, spectral_color, shininess, transparency, reflective, id):
         self.color = color
         self.spectral_color = spectral_color
         self.shininess = shininess
         self.reflective = reflective
+        self.transparency = transparency
         self.id = id
+        
     
     def hit_test(self):
         pass
@@ -160,7 +208,7 @@ class Surface():
     
 class Sphere(Surface):
     def __init__(self, center, radius, color, spectral_color, shininess, transparency, reflective, id):
-        Surface.__init__(self, color, spectral_color, shininess, reflective, id)
+        Surface.__init__(self, color, spectral_color, shininess, transparency, reflective, id)
         self.center = center
         self.radius = radius 
         
