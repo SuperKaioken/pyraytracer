@@ -11,7 +11,7 @@ image_plane_width = 200
 image_plane_height = 200
 window_width = 200
 window_height = 200
-viewpoint = numpy.array([0,0,100])
+viewpoint = numpy.array([0,0,50])
 
 x_axis = numpy.array([1,0,0])
 y_axis = numpy.array([0,1,0])
@@ -38,7 +38,7 @@ class Scene():
         # populate with object(s) and light(s)
         self.add_object(Sphere(numpy.array([0,0, -305]), 260, numpy.array([1.0,0.0,0.0]), numpy.array([0.8,0.8,0.8]), 32, 50, True, random.random()))
         self.add_object(Sphere(numpy.array([30,0, -11]), 10, numpy.array([0.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, 50, False, random.random()))
-        #self.add_object(Plane(numpy.array([0,-20,-10]), numpy.array([0,1,0.0001]), numpy.array([1.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, time.time()))
+        self.add_object(Plane(numpy.array([-1000,0,-10]), numpy.array([1,0,0]), numpy.array([1.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, True, random.random()))
         self.add_light(Light(numpy.array([200,50,50]), numpy.array([1,1,1]), numpy.array([0.5,0.5,0.5])))
         
     def add_object(self, object):
@@ -103,7 +103,6 @@ class Scene():
                     hit_objects.append(object)
                 
         if len(hit_objects) > 0:
-            print 'in shadow'
             return True
         else:
             return False
@@ -184,8 +183,8 @@ class Sphere(Surface):
         return (point - self.center) / self.radius
     
 class Plane(Surface):
-    def __init__(self, point, normal, color, spectral_color, shininess, id):
-        Surface.__init__(self, color, spectral_color, shininess, id)
+    def __init__(self, point, normal, color, spectral_color, shininess, reflective, id):
+        Surface.__init__(self, color, spectral_color, shininess, reflective, id)
         self.point = point
         self.normal = normal
 
