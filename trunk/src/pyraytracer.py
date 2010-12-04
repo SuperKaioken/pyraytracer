@@ -11,7 +11,7 @@ image_plane_width = 200
 image_plane_height = 200
 window_width = 200
 window_height = 200
-viewpoint = numpy.array([0,0,20])
+viewpoint = numpy.array([0,0,100])
 
 x_axis = numpy.array([1,0,0])
 y_axis = numpy.array([0,1,0])
@@ -36,8 +36,8 @@ class Scene():
         self.ambient_color = numpy.array([0.1,0.1,0.1])
         
         # populate with object(s) and light(s)
-        self.add_object(Sphere(numpy.array([0,0, -305]), 300, numpy.array([1.0,0.0,0.0]), numpy.array([0.8,0.8,0.8]), 32, 50, True, random.random()))
-        #self.add_object(Sphere(numpy.array([0,0, -10]), 10, numpy.array([0.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, 50, False, random.random()))
+        self.add_object(Sphere(numpy.array([0,0, -305]), 260, numpy.array([1.0,0.0,0.0]), numpy.array([0.8,0.8,0.8]), 32, 50, True, random.random()))
+        self.add_object(Sphere(numpy.array([30,0, -11]), 10, numpy.array([0.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, 50, False, random.random()))
         #self.add_object(Plane(numpy.array([0,-20,-10]), numpy.array([0,1,0.0001]), numpy.array([1.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, time.time()))
         self.add_light(Light(numpy.array([200,50,50]), numpy.array([1,1,1]), numpy.array([0.5,0.5,0.5])))
         
