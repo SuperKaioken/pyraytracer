@@ -36,7 +36,7 @@ class Scene():
         self.ambient_color = numpy.array([0.1,0.1,0.1])
         
         # populate with object(s) and light(s)
-        self.add_object(Sphere(numpy.array([0,0, -305]), 260, numpy.array([1.0,0.0,0.0]), numpy.array([0.8,0.8,0.8]), 32, 0, True, random.random()))
+        self.add_object(Sphere(numpy.array([0,0, -305]), 100, numpy.array([1.0,0.0,0.0]), numpy.array([0.8,0.8,0.8]), 32, 0, True, random.random()))
         self.add_object(Sphere(numpy.array([30,0, -20]), 19, numpy.array([0.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, 1.51, False, random.random()))
         #self.add_object(Plane(numpy.array([-1000,0,-10]), numpy.array([1,0,0]), numpy.array([1.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, True, random.random()))
         self.add_light(Light(numpy.array([200,50,50]), numpy.array([1,1,1]), numpy.array([0.5,0.5,0.5])))
@@ -111,16 +111,28 @@ class Scene():
         
     def shoot_transparency_ray(self, object, origin, dir, normal, id):
         n = 1.00 # refractive index of air
-        nt = 1.51  # refractive index of window glass
+        nt = 1.00  # refractive index of window glass
+        dir = normalize(dir)
+        
+        
         
         #book's way
         sqrt = 1 - (n**2 * (1-(numpy.dot(dir,normal)**2))) / nt**2                
         if(sqrt < 0):       
             return 0 #All energy REFLECTED, no refracted ray
         else:
-            firstPart = n * (dir - normal*(numpy.dot(dir,normal)))/nt
-            secondPart = n * sqrt
-            tresult = firstPart - secondPart
+#            firstPart = n * (dir - normal*(numpy.dot(dir,normal)))/nt
+#            secondPart = n * sqrt
+#            tVector = firstPart - secondPart
+#            tVector = normalize(tVector)
+
+            c1 = -(numpy.dot(normal,dir))
+            n1 = n
+            n2 = nt
+            n = numpy.array(n1 / n2)
+            c2 = numpy.sqrt( 1 - n**2 * (1 - c1**2))
+            tVector = normalize((n * dir) + (n * c1 - c2) * normal)
+            
             
             intersections = []
             hit_objects = []
@@ -128,7 +140,7 @@ class Scene():
             
             # see which objects the ray hits
             for object in self.objects:
-                intersection_value = object.hit_test(origin, tresult)
+                intersection_value = object.hit_test(origin, tVector)
                 if(intersection_value > 0): 
                     intersections.append(intersection_value)                              
                     hit_objects.append(object)
@@ -140,7 +152,7 @@ class Scene():
                 intersections, hit_objects = zip(*assoc)
             # if a ValueError is thrown then no objects were hit
             except(ValueError):
-                return color
+                return object.color
             
             # if we get to here then at least one object was hit
             object = hit_objects[0]
@@ -150,7 +162,8 @@ class Scene():
             # calculate lighting effects
             color = self.__calc_lighting(object, point)
             
-            c = numpy.dot(tresult, normal)
+            c = numpy.dot(tVector, normal)
+            
             R0 = ((n-1)**2) / (n+1)**2
             R = (R0 + (1-R0))/((1-c)**5)
             return ((R * object.color) + ((1-R) * color)) 
