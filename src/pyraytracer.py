@@ -33,13 +33,13 @@ class Scene():
         self.objects = []
         self.lights = []
         self.background_color = numpy.array([0,0,0])
-        self.ambient_color = numpy.array([0.3,0.3,0.3])
+        self.ambient_color = numpy.array([0.1,0.1,0.1])
         
         # populate with object(s) and light(s)
-        self.add_object(Sphere(numpy.array([-45,0, -205]), 200, numpy.array([1.0,0.0,0.0]), numpy.array([0.8,0.8,0.8]), 32, 50, True, random.random()))
-        self.add_object(Sphere(numpy.array([0,0, -10]), 10, numpy.array([0.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, 50, False, random.random()))
+        self.add_object(Sphere(numpy.array([0,0, -305]), 300, numpy.array([1.0,0.0,0.0]), numpy.array([0.8,0.8,0.8]), 32, 50, True, random.random()))
+        #self.add_object(Sphere(numpy.array([0,0, -10]), 10, numpy.array([0.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, 50, False, random.random()))
         #self.add_object(Plane(numpy.array([0,-20,-10]), numpy.array([0,1,0.0001]), numpy.array([1.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, time.time()))
-        self.add_light(Light(numpy.array([45,40,0]), numpy.array([1,1,1]), numpy.array([0.5,0.5,0.5])))
+        self.add_light(Light(numpy.array([200,50,50]), numpy.array([1,1,1]), numpy.array([0.5,0.5,0.5])))
         
     def add_object(self, object):
         self.objects.append(object)
@@ -97,11 +97,6 @@ class Scene():
         
         # see which objects the ray hits, other than the object the ray originated from
         for object in self.objects:
-            print object
-            print object.id
-            print id
-            print '\n'
-            
             if object.id != id:
                 intersection_value = object.hit_test(origin, dir)
                 if(intersection_value > 0):                              
@@ -120,6 +115,7 @@ class Scene():
         angle = numpy.rad2deg(numpy.arccos(numpy.dot(incident, normal)))
         print angle
 
+    # remember that not taking the abs value causes weird problems
     def __calc_lighting(self, object, point):
         light_position = self.lights[0].position
         light_color = self.lights[0].color
@@ -143,11 +139,11 @@ class Scene():
     
     def __calc_Id(self, kd, li, n, Idi):
         
-        return kd * numpy.dot(li, n) * Idi
+        return kd * numpy.abs(numpy.dot(li, n)) * Idi
     
     def __calc_Is(self, ks, n, h, s, Isi):
             
-        return Isi * (numpy.dot(n, h) ** s)
+        return Isi * (numpy.abs(numpy.dot(n, h)) ** s)
                    
 class Surface():
     def __init__(self, color, spectral_color, shininess, reflective, id):
