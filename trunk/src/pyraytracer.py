@@ -42,6 +42,13 @@ class Scene():
         self.add_object(Sphere(numpy.array([0,0, -20]), 19, numpy.array([0.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, 1.51, False, random.random()))
         #self.add_object(Plane(numpy.array([-1000,0,-10]), numpy.array([1,0,0]), numpy.array([1.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, True, random.random()))
         self.add_light(Light(numpy.array([200,50,50]), numpy.array([1,1,1]), numpy.array([0.5,0.5,0.5])))
+
+#        self.add_object(Sphere(numpy.array([-50,0, -100]), 50, numpy.array([1.0,0.0,0.0]), numpy.array([0.8,0.8,0.8]), 32, 50, True, random.random()))
+#        self.add_object(Sphere(numpy.array([50,0, -50]), 40, numpy.array([0.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, 50, False, random.random()))
+#        self.add_object(Sphere(numpy.array([50,30, -70]), 40, numpy.array([0.0,1.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, 50, False, random.random()))
+#        #self.add_object(Plane(numpy.array([0,-100,-10]), numpy.array([0,1,-0.000001]), numpy.array([1.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, True, random.random()))
+#        self.add_light(Light(numpy.array([150,0,0]), numpy.array([1,1,1]), numpy.array([0.5,0.5,0.5])))
+
         
     def add_object(self, object):
         self.objects.append(object)
