@@ -11,7 +11,7 @@ image_plane_width = 200
 image_plane_height = 200
 window_width = 200
 window_height = 200
-viewpoint = numpy.array([0,0,50])
+viewpoint = numpy.array([0,0,20])
 
 x_axis = numpy.array([1,0,0])
 y_axis = numpy.array([0,1,0])
@@ -33,13 +33,14 @@ class Scene():
         self.objects = []
         self.lights = []
         self.background_color = numpy.array([0,0,0])
-        self.ambient_color = numpy.array([0.1,0.1,0.1])
+        self.ambient_color = numpy.array([0.2,0.2,0.2])
         
         # populate with object(s) and light(s)
-        self.add_object(Sphere(numpy.array([0,0, -305]), 100, numpy.array([1.0,0.0,0.0]), numpy.array([0.8,0.8,0.8]), 32, 0, True, random.random()))
-        self.add_object(Sphere(numpy.array([30,0, -20]), 19, numpy.array([0.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, 1.51, False, random.random()))
-        #self.add_object(Plane(numpy.array([-1000,0,-10]), numpy.array([1,0,0]), numpy.array([1.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, True, random.random()))
-        self.add_light(Light(numpy.array([200,50,50]), numpy.array([1,1,1]), numpy.array([0.5,0.5,0.5])))
+        self.add_object(Sphere(numpy.array([-50,0, -100]), 50, numpy.array([1.0,0.0,0.0]), numpy.array([0.8,0.8,0.8]), 32, 50, True, random.random()))
+        self.add_object(Sphere(numpy.array([50,0, -50]), 40, numpy.array([0.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, 50, False, random.random()))
+        self.add_object(Sphere(numpy.array([50,30, -70]), 40, numpy.array([0.0,1.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, 50, False, random.random()))
+        #self.add_object(Plane(numpy.array([0,-100,-10]), numpy.array([0,1,-0.000001]), numpy.array([1.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, True, random.random()))
+        self.add_light(Light(numpy.array([150,0,0]), numpy.array([1,1,1]), numpy.array([0.5,0.5,0.5])))
         
     def add_object(self, object):
         self.objects.append(object)
@@ -86,11 +87,13 @@ class Scene():
         # calculate reflection
         if options.find('r') != -1:
             if object.reflective == True:
-                self.shoot_reflection_ray(point, dir, object.calc_normal(point), id)
+                temp_color = self.shoot_reflection_ray(point, dir, object.calc_normal(point), id)
+                if temp_color != None:
+                    color = temp_color
          
-        # determine if in shadow
-        if self.shoot_shadow_ray(point, normalize(self.lights[0].position - point), object.id) == True:
-            color = self.ambient_color * object.color
+#        # determine if in shadow
+#        if self.shoot_shadow_ray(point, normalize(self.lights[0].position - point), object.id) == True:
+#            color = self.ambient_color * object.color
 
         return color
     
@@ -99,7 +102,7 @@ class Scene():
         
         # see which objects the ray hits, other than the object the ray originated from
         for object in self.objects:
-            if object.id != id:
+#            if object.id != id:
                 intersection_value = object.hit_test(origin, dir)
                 if(intersection_value > 0):                              
                     hit_objects.append(object)
@@ -170,8 +173,36 @@ class Scene():
                         
     
     def shoot_reflection_ray(self, origin, incident, normal, id):
-        angle = numpy.rad2deg(numpy.arccos(numpy.dot(incident, normal)))
-        print angle
+        c1 = -numpy.dot(incident, normal)
+        Rl = incident + (2 * normal * c1 ) 
+        
+        intersections = []
+        hit_objects = []
+        
+        # see which objects the ray hits
+        for object in self.objects:
+            intersection_value = object.hit_test(origin, Rl)
+            if(intersection_value > 0): 
+                intersections.append(intersection_value)                              
+                hit_objects.append(object)
+                
+        # sort to find the closest object
+        try:
+            assoc = zip(intersections, hit_objects)
+            assoc.sort()
+            intersections, hit_objects = zip(*assoc)
+        # if a ValueError is thrown then no objects were hit
+        except(ValueError):
+            return None
+        
+        # if we get to here then at least one object was hit
+        object = hit_objects[0]
+        point = origin + intersections[0] * Rl
+        
+        color = self.__calc_lighting(object, point)
+
+        print 'reflection hit'
+        return color
 
     # remember that not taking the abs value causes weird problems
     def __calc_lighting(self, object, point):
@@ -196,8 +227,11 @@ class Scene():
         return ka * Iaglobal
     
     def __calc_Id(self, kd, li, n, Idi):
-        
-        return kd * numpy.abs(numpy.dot(li, n)) * Idi
+        test = numpy.dot(li, n)
+        if test < 0:
+            return numpy.array([0,0,0])
+        else:
+            return kd * test * Idi
     
     def __calc_Is(self, ks, n, h, s, Isi):
             
@@ -342,12 +376,12 @@ class MainWindow(pyglet.window.Window):
                 x = left + (((right - left)*(i + 0.5)) / window_width)
                 y = bottom + (((top - bottom)*(j + 0.5)) / window_height)
                 
-                dir = normalize(numpy.array((x_axis * x) + (y_axis * y) + (z_axis * -viewpoint[2])))            
-                ray_color = self.scene.shoot_ray(viewpoint, dir, 'l')
+#                dir = normalize(numpy.array((x_axis * x) + (y_axis * y) + (z_axis * -viewpoint[2])))            
+#                ray_color = self.scene.shoot_ray(viewpoint, dir, 'l')
             
-#                dir = normalize(numpy.array([0,0,-1]))
-#                ortho_origin = numpy.array([x,y,0])
-#                ray_color = self.scene.shoot_ray(ortho_origin, dir, 'l')
+                dir = normalize(numpy.array([0,0,-1]))
+                ortho_origin = numpy.array([x,y,0])
+                ray_color = self.scene.shoot_ray(ortho_origin, dir, 'l')
                 
                 # it is much faster to create the list of pixels and colors, then call pyglet.graphics.draw once at the end
                 pixels.append(i)
