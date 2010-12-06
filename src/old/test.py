@@ -1,10 +1,3 @@
-from multiprocessing import Process
-import os
-import time
+import numpy
 
-import Image
-
-try:
-    img = Image.open('asdfasdf')
-except(IOError)
-    
+print numpy.dot(numpy.array([0,0,-1]), numpy.array([0,0,1]))
