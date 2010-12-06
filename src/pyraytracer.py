@@ -37,9 +37,11 @@ class Scene():
         
         # populate with object(s) and light(s)
 
-        self.add_object(Sphere(numpy.array([0,0, -305]), 100, numpy.array([1.0,0.0,0.0]), numpy.array([0.8,0.8,0.8]), 32, 0, True, random.random()))
+        #self.add_object(Sphere(numpy.array([0,0, -305]), 100, numpy.array([1.0,0.0,0.0]), numpy.array([0.8,0.8,0.8]), 32, 0, True, random.random()))
+        #self.add_object(Ellipsoid(1, 2, 1, numpy.array([0,0, -305]), 50, numpy.array([1.0,0.0,0.0]), numpy.array([0.8,0.8,0.8]), 32, 0, True, random.random()))
+        self.add_object(Hyperboloid(1, 2, 1, numpy.array([0,0, -305]), 50, numpy.array([1.0,0.0,0.0]), numpy.array([0.8,0.8,0.8]), 32, 0, True, random.random()))
         #self.add_object(Sphere(numpy.array([30,0, -20]), 19, numpy.array([0.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, 1.51, False, random.random()))
-        self.add_object(Sphere(numpy.array([0,0, -20]), 19, numpy.array([0.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, 1.51, False, random.random()))
+        self.add_object(Sphere(numpy.array([5,0, -20]), 19, numpy.array([0.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, 1.51, False, random.random()))
         #self.add_object(Plane(numpy.array([-1000,0,-10]), numpy.array([1,0,0]), numpy.array([1.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, True, random.random()))
         self.add_light(Light(numpy.array([200,50,50]), numpy.array([1,1,1]), numpy.array([0.5,0.5,0.5])))
 
@@ -89,8 +91,7 @@ class Scene():
         # calculate transparency
         if options.find('t') != -1:            
             if object.transparency >= 1:
-                color = self.shoot_transparency_ray(object, point, dir, object.calc_normal(point), id)
-                #color = (color + self.background_color) / 2
+                color = self.shoot_transparency_ray(object, point, dir, object.calc_normal(point), id)                                
 
         # calculate reflection
         if options.find('r') != -1:
@@ -99,10 +100,10 @@ class Scene():
                 if temp_color != None:
                     color = temp_color
          
-#        # determine if in shadow
-#        if self.shoot_shadow_ray(point, normalize(self.lights[0].position - point), object.id) == True:
-#            color = self.ambient_color * object.color
-
+        # determine if in shadow
+        if self.shoot_shadow_ray(point, normalize(self.lights[0].position - point), object.id) == True:
+            color = self.ambient_color * object.color
+                    
         return color
     
     def shoot_shadow_ray(self, origin, dir, id):
@@ -110,7 +111,7 @@ class Scene():
         
         # see which objects the ray hits, other than the object the ray originated from
         for object in self.objects:
-#            if object.id != id:
+            if object.id != id:
                 intersection_value = object.hit_test(origin, dir)
                 if(intersection_value > 0):                              
                     hit_objects.append(object)
@@ -122,29 +123,23 @@ class Scene():
         
     def shoot_transparency_ray(self, OrigObject, origin, dir, normal, id):
         n = 1.00 # refractive index of air
-        nt = 1.51  # refractive index of window glass
+        nt = 1.00  # refractive index of window glass
         
-        dir = normalize(dir)
-        
+        dir = normalize(dir)        
         
         
         #book's way
         sqrt = 1 - (n**2 * (1-(numpy.dot(dir,normal)**2))) / nt**2                
-        if(sqrt < 0):            
-            return 0 #All energy REFLECTED, no refracted ray
+        if(sqrt < 0):     
+            print 'wrong'       
+            return numpy.array([0,0,0]) #All energy REFLECTED, no refracted ray, should absorb reflected ray
         else:
-#            firstPart = n * (dir - normal*(numpy.dot(dir,normal)))/nt
-#            secondPart = n * sqrt
-#            tVector = firstPart - secondPart
-#            tVector = normalize(tVector)
-
-            c1 = -(numpy.dot(normal,dir))
-            n1 = n
-            n2 = nt
-            n = numpy.array(n1 / n2)
-            c2 = numpy.sqrt( 1 - n**2 * (1 - c1**2))
-            tVector = (n * dir) + ((n * c1) - c2) * normal
-            
+            #from powerpoint
+            #Nr = n/nt
+            Nr = 1/nt
+            dotNI = numpy.dot(normal, -dir)
+            tVector = normalize((Nr*dotNI - numpy.sqrt(1 - Nr**2 * (1-dotNI**2))) * normal - (Nr*-dir))
+                  
             
             intersections = []
             hit_objects = []
@@ -164,8 +159,10 @@ class Scene():
                 assoc.sort()
                 intersections, hit_objects = zip(*assoc)
             # if a ValueError is thrown then no objects were hit
-            except(ValueError):                               
-                return OrigObject.color
+            except(ValueError):
+                print "didn't hit anything"
+                return numpy.array([0,0,0])                                     
+                #return OrigObject.color
             
             # if we get to here then at least one object was hit
             object = hit_objects[0]
@@ -175,11 +172,16 @@ class Scene():
             # calculate lighting effects
             color = self.__calc_lighting(object, point)
             
-            c = numpy.dot(tVector, normal)
+            c = numpy.dot(tVector, -normal)
             
-            R0 = ((n-1)**2) / (n+1)**2
-            R = (R0 + (1-R0))/((1-c)**5)
-            return ((R * OrigObject.color) + ((1-R) * color)) 
+            
+            R0 = ((nt-1)**2) / ((nt+1)**2)
+            R = R0 + (((1-R0)*(1-c))**5)
+            
+            newColor = (((R) * OrigObject.color) + ((1-R) * color))
+            
+                        
+            return newColor
                         
     
     def shoot_reflection_ray(self, origin, incident, normal, id):
@@ -215,6 +217,7 @@ class Scene():
         return color
 
     # remember that not taking the abs value causes weird problems
+    
     def __calc_lighting(self, object, point):
         light_position = self.lights[0].position
         light_color = self.lights[0].color
@@ -230,8 +233,7 @@ class Scene():
         Is = self.__calc_Is(object.spectral_color, n, h, object.shininess, light_spectral_color)
                         
         return Ia + Id + Is
-            
-    
+                
     def __calc_Ia(self, ka, Iaglobal):
         
         return ka * Iaglobal
@@ -270,6 +272,62 @@ class Sphere(Surface):
         self.radius = radius 
         
     def hit_test(self, origin, dir):
+        # first test the discriminant
+        discriminant = (numpy.dot(dir, (origin - self.center)) ** 2 - numpy.dot(dir, dir) * ((numpy.dot(origin - self.center, origin - self.center)) - (self.radius ** 2))) 
+        
+        # if the discriminant is less than one then the sqrt will yield an imaginary number and thus there is no intersection
+        if discriminant < 0:
+            return -1
+        # if the discriminant is equal to zero then the ray hit one point, i.e the very top or bottom of the sphere
+        elif discriminant == 0:
+            return numpy.dot(-dir, origin - self.center) / numpy.dot(dir, dir)
+        # if the discriminant is greater than zero then the ray went in one side and out the other
+        elif discriminant > 0:
+            # take the value of where the ray went in
+            return min([(numpy.dot(-dir, origin - self.center) + numpy.sqrt(discriminant)) / numpy.dot(dir, dir) , (numpy.dot(-dir, origin - self.center) - numpy.sqrt(discriminant)) / numpy.dot(dir, dir)])
+      
+    def calc_normal(self, point):
+        return (point - self.center) / self.radiu        
+
+class Ellipsoid(Surface):
+    def __init__(self, A, B, C, center, radius, color, spectral_color, shininess, transparency, reflective, id):
+        Surface.__init__(self, color, spectral_color, shininess, transparency, reflective, id)
+        self.center = center
+        self.radius = radius 
+        self.A = A
+        self.B = B
+        self.C = C
+        
+    def hit_test(self, origin, dir):
+        origin = ([origin[0]/self.A, origin[1]/self.B, origin[2]/self.C])
+        # first test the discriminant
+        discriminant = (numpy.dot(dir, (origin - self.center)) ** 2 - numpy.dot(dir, dir) * ((numpy.dot(origin - self.center, origin - self.center)) - (self.radius ** 2))) 
+        
+        # if the discriminant is less than one then the sqrt will yield an imaginary number and thus there is no intersection
+        if discriminant < 0:
+            return -1
+        # if the discriminant is equal to zero then the ray hit one point, i.e the very top or bottom of the sphere
+        elif discriminant == 0:
+            return numpy.dot(-dir, origin - self.center) / numpy.dot(dir, dir)
+        # if the discriminant is greater than zero then the ray went in one side and out the other
+        elif discriminant > 0:
+            # take the value of where the ray went in
+            return min([(numpy.dot(-dir, origin - self.center) + numpy.sqrt(discriminant)) / numpy.dot(dir, dir) , (numpy.dot(-dir, origin - self.center) - numpy.sqrt(discriminant)) / numpy.dot(dir, dir)])
+      
+    def calc_normal(self, point):
+        return (point - self.center) / self.radius
+
+class Hyperboloid(Surface):
+    def __init__(self, A, B, C, center, radius, color, spectral_color, shininess, transparency, reflective, id):
+        Surface.__init__(self, color, spectral_color, shininess, transparency, reflective, id)
+        self.center = center
+        self.radius = radius 
+        self.A = A
+        self.B = B
+        self.C = C
+        
+    def hit_test(self, origin, dir):
+        origin = ([origin[0]/self.A, origin[1]/self.B, -origin[2]/self.C])
         # first test the discriminant
         discriminant = (numpy.dot(dir, (origin - self.center)) ** 2 - numpy.dot(dir, dir) * ((numpy.dot(origin - self.center, origin - self.center)) - (self.radius ** 2))) 
         
@@ -494,7 +552,7 @@ class MainWindow(pyglet.window.Window):
                 
                 # it is much faster to create the list of pixels and colors, then call pyglet.graphics.draw once at the end
                 pixels.append(i)
-                pixels.append(j)
+                pixels.append(j)                                      
                 colors.append(ray_color[0])
                 colors.append(ray_color[1])
                 colors.append(ray_color[2])
