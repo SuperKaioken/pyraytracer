@@ -24,6 +24,9 @@ def normalize(vector):
         return numpy.array([vector[0] / magnitude, vector[1] / magnitude, vector[2] / magnitude]) 
     except(ZeroDivisionError):
         return numpy.array([0, 0, 0]) 
+
+def distance(a, b):
+    return numpy.abs(numpy.sqrt((a[0] - b[0])**2 + (a[1] - b[1])**2 + (a[2] - b[2])**2))
     
 class Scene():
     def __init__(self):
@@ -37,19 +40,19 @@ class Scene():
         
         # populate with object(s) and light(s)
 
-        #self.add_object(Sphere(numpy.array([0,0, -305]), 100, numpy.array([1.0,0.0,0.0]), numpy.array([0.8,0.8,0.8]), 32, 0, True, random.random()))
-        #self.add_object(Ellipsoid(1, 2, 1, numpy.array([0,0, -305]), 50, numpy.array([1.0,0.0,0.0]), numpy.array([0.8,0.8,0.8]), 32, 0, True, random.random()))
-        self.add_object(Hyperboloid(1, 2, 1, numpy.array([0,0, -305]), 50, numpy.array([1.0,0.0,0.0]), numpy.array([0.8,0.8,0.8]), 32, 0, True, random.random()))
-        #self.add_object(Sphere(numpy.array([30,0, -20]), 19, numpy.array([0.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, 1.51, False, random.random()))
-        self.add_object(Sphere(numpy.array([5,0, -20]), 19, numpy.array([0.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, 1.51, False, random.random()))
-        #self.add_object(Plane(numpy.array([-1000,0,-10]), numpy.array([1,0,0]), numpy.array([1.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, True, random.random()))
-        self.add_light(Light(numpy.array([200,50,50]), numpy.array([1,1,1]), numpy.array([0.5,0.5,0.5])))
+#        self.add_object(Sphere(numpy.array([-50,0, -200]), 100, numpy.array([1.0,0.0,0.0]), numpy.array([0.8,0.8,0.8]), 32, 0, True, random.random()))
+#        self.add_object(Sphere(numpy.array([30,0, -20]), 19, numpy.array([0.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, 1.51, False, random.random()))
+#        self.add_object(Sphere(numpy.array([0,0, -20]), 19, numpy.array([0.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, 1.51, False, random.random()))
+#
+#        self.add_light(Light(numpy.array([200,50,50]), numpy.array([1,1,1]), numpy.array([0.5,0.5,0.5])))
 
-#        self.add_object(Sphere(numpy.array([-50,0, -100]), 50, numpy.array([1.0,0.0,0.0]), numpy.array([0.8,0.8,0.8]), 32, 50, True, random.random()))
-#        self.add_object(Sphere(numpy.array([50,0, -50]), 40, numpy.array([0.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, 50, False, random.random()))
-#        self.add_object(Sphere(numpy.array([50,30, -70]), 40, numpy.array([0.0,1.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, 50, False, random.random()))
-#        #self.add_object(Plane(numpy.array([0,-100,-10]), numpy.array([0,1,-0.000001]), numpy.array([1.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, True, random.random()))
-#        self.add_light(Light(numpy.array([150,0,0]), numpy.array([1,1,1]), numpy.array([0.5,0.5,0.5])))
+        self.add_object(Sphere(numpy.array([-50,0, -100]), 50, numpy.array([1.0,0.0,0.0]), numpy.array([0.8,0.8,0.8]), 32, 50, True, random.random()))
+        self.add_object(Sphere(numpy.array([50,0, -50]), 40, numpy.array([0.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, 50, False, random.random()))
+        self.add_object(Sphere(numpy.array([50,30, -70]), 40, numpy.array([0,1.0,0.0]), numpy.array([0.8,0.8,0.8]), 32, 50, False, random.random()))
+        
+        self.add_object(Square(numpy.array([numpy.array([-20,20,-20]), numpy.array([20,20,-20]), numpy.array([20,0,-20]), numpy.array([-20,0,-20])]), numpy.array([0,0,1]), numpy.array([1.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, 0, False, random.random()))
+        
+        self.add_light(Light(numpy.array([150,0,0]), numpy.array([1,1,1]), numpy.array([0.5,0.5,0.5])))
 
         
     def add_object(self, object):
@@ -272,6 +275,7 @@ class Sphere(Surface):
         self.radius = radius 
         
     def hit_test(self, origin, dir):
+        
         # first test the discriminant
         discriminant = (numpy.dot(dir, (origin - self.center)) ** 2 - numpy.dot(dir, dir) * ((numpy.dot(origin - self.center, origin - self.center)) - (self.radius ** 2))) 
         
@@ -360,6 +364,46 @@ class Plane(Surface):
             
     def calc_normal(self, point):
         return self.normal
+    
+class Square(Surface):
+    def __init__(self, points, normal, color, spectral_color, shininess, transparency, reflective, id):
+        Surface.__init__(self, color, spectral_color, shininess, transparency, reflective, id)
+        self.normal = normal
+        self.points = points
+        self.v1 = normalize(points[1] - points[0])
+        self.v2 = normalize(points[2] - points[1])
+        self.v3 = normalize(points[3] - points[2])
+        self.v4 = normalize(points[0] - points[3])
+
+    def hit_test(self, origin, dir):
+        # first, do a ray / plane intersection test
+        denom = numpy.dot(normalize(dir), normalize(self.normal))
+        
+        if denom == 0:
+            return -1
+        else: # the ray does intersect the plane
+            intersection = numpy.dot(self.points[0] - origin, self.normal) / denom
+            point = origin + (intersection * dir)
+
+            a1 = normalize(point - self.points[0])
+            a2 = normalize(point - self.points[1])
+            a3 = normalize(point - self.points[2])
+            a4 = normalize(point - self.points[3]) 
+            
+            dot1 = numpy.dot(self.v1, a1)
+            dot2 = numpy.dot(self.v2, a2)
+            dot3 = numpy.dot(self.v3, a3)
+            dot4 = numpy.dot(self.v4, a4)
+            
+            
+            if (dot1 > 0) and (dot2 > 0) and (dot3 > 0) and (dot4 > 0):
+                print point
+                return intersection
+            else:
+                return -1
+            
+    def calc_normal(self, point):
+        return self.normal
 
 class Light():
     def __init__(self, position, color, spectral_color):
@@ -411,12 +455,12 @@ class MainWindow(pyglet.window.Window):
                 x = left + (((right - left)*(i + 0.5)) / window_width)
                 y = bottom + (((top - bottom)*(j + 0.5)) / window_height)
                 
-                dir = normalize(numpy.array((x_axis * x) + (y_axis * y) + (z_axis * -viewpoint[2])))            
-                ray_color = self.scene.shoot_ray(viewpoint, dir, '')
+#                dir = normalize(numpy.array((x_axis * x) + (y_axis * y) + (z_axis * -viewpoint[2])))            
+#                ray_color = self.scene.shoot_ray(viewpoint, dir, '')
             
-#                dir = normalize(numpy.array([0,0,-1]))
-#                ortho_origin = numpy.array([x,y,0])
-#                ray_color = self.scene.shoot_ray(ortho_origin, dir, '')
+                dir = normalize(numpy.array([0,0,-1]))
+                ortho_origin = numpy.array([x,y,0])
+                ray_color = self.scene.shoot_ray(ortho_origin, dir, '')
                 
                 # it is much faster to create the list of pixels and colors, then call pyglet.graphics.draw once at the end
                 pixels.append(i)
