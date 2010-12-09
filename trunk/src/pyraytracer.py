@@ -11,6 +11,7 @@ image_plane_width = 200
 image_plane_height = 200
 window_width = 500
 window_height = 500
+
 viewpoint = numpy.array([0,0,20])
 
 x_axis = numpy.array([1,0,0])
@@ -58,14 +59,14 @@ class Scene():
         self.ambient_color = numpy.array([0.2,0.2,0.2])
         
         # populate with object(s) and light(s)
-        
-        # scene test
-#        self.add_object(Sphere(numpy.array([-50,0, -100]), 50, numpy.array([1.0,0.0,0.0]), numpy.array([0.8,0.8,0.8]), 32, 50, True, random.random()))
-#        self.add_object(Sphere(numpy.array([50,0, -50]), 40, numpy.array([0.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, 50, False, random.random()))
-#        self.add_object(Sphere(numpy.array([50,30, -70]), 40, numpy.array([0,1.0,0.0]), numpy.array([0.8,0.8,0.8]), 32, 50, False, random.random()))
-#        self.add_object(Square(numpy.array([numpy.array([-20,20,-30]), numpy.array([20,20,-10]), numpy.array([20,0,-20]), numpy.array([-20,0,-20])]), numpy.array([1.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, 0, False, random.random()))
-#        #self.add_object(Triangle(numpy.array([numpy.array([55,-75,-10]), numpy.array([75,-30,-10]), numpy.array([65,-80,-10])]), numpy.array([1.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, 0, False, random.random()))
-#        self.add_light(Light(numpy.array([10,10,0]), numpy.array([1,1,1]), numpy.array([0.5,0.5,0.5])))
+        #self.add_object(Sphere(numpy.array([0,0, -305]), 100, numpy.array([1.0,0.0,0.0]), numpy.array([0.8,0.8,0.8]), 32, 0, True, random.random()))
+        #self.add_object(Ellipsoid(1, 2, 1, numpy.array([0,0, -305]), 50, numpy.array([1.0,0.0,0.0]), numpy.array([0.8,0.8,0.8]), 32, 0, True, random.random()))
+        self.add_object(Hyperboloid(1, 2, 1, numpy.array([0,0, -305]), 50, numpy.array([1.0,0.0,0.0]), numpy.array([0.8,0.8,0.8]), 32, 0, True, random.random()))
+        #self.add_object(Sphere(numpy.array([30,0, -20]), 19, numpy.array([0.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, 1.51, False, random.random()))
+        self.add_object(Sphere(numpy.array([5,0, -20]), 19, numpy.array([0.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, 1.51, False, random.random()))
+        #self.add_object(Plane(numpy.array([-1000,0,-10]), numpy.array([1,0,0]), numpy.array([1.0,0.0,1.0]), numpy.array([0.8,0.8,0.8]), 32, True, random.random()))
+        self.add_light(Light(numpy.array([200,50,50]), numpy.array([1,1,1]), numpy.array([0.5,0.5,0.5])))
+
 
         # scene 1
         self.add_object(Ellipsoid(1, 2, 1, numpy.array([-50, 0, -100]), 50, numpy.array([1.0,0.0,0.0]), numpy.array([0.8,0.8,0.8]), 32, 0, True, random.random()))
@@ -146,7 +147,7 @@ class Scene():
         
     def shoot_transparency_ray(self, OrigObject, origin, dir, normal, id):
         n = 1.00 # refractive index of air
-        nt = 1.00  # refractive index of window glass
+        nt = 1.50  # refractive index of flint glass
         
         dir = normalize(dir)        
         
@@ -204,8 +205,7 @@ class Scene():
             newColor = (((R) * OrigObject.color) + ((1-R) * color))
                         
             return newColor
-                        
-    
+                            
     def shoot_reflection_ray(self, origin, incident, normal, id):
         c1 = -numpy.dot(incident, normal)
         Rl = incident + (2 * normal * c1 ) 
